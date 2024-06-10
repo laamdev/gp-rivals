@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Driver {
+  id                String           @id @default(cuid())
+  firstName         String
+  lastName          String
+  nameId            String           @unique
+  dateOfBirth       DateTime
+  nationality       String
+  carNumber         Int
+  championshipsWon  Int              @default(0)
+  racesParticipated Int              @default(0)
+  podiums           Int              @default(0)
+  wins              Int              @default(0)
+  poles             Int              @default(0)
+  fastestLaps       Int              @default(0)
+  points            Float            @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  teams             TeamMembership[]
+  raceResults       RaceResult[]
+}
+
+model Team {
+  id                String           @id @default(cuid())
+  name              String
+  base              String
+  teamPrincipal     String
+  championshipsWon  Int              @default(0)
+  racesParticipated Int              @default(0)
+  wins              Int              @default(0)
+  podiums           Int              @default(0)
+  poles             Int              @default(0)
+  fastestLaps       Int              @default(0)
+  points            Float            @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  drivers           TeamMembership[]
+}
+
+model TeamMembership {
+  id         String       @id @default(cuid())
+  driver     Driver       @relation(fields: [driverId], references: [id])
+  driverId   String
+  team       Team         @relation(fields: [teamId], references: [id])
+  teamId     String
+  season     Season       @relation(fields: [seasonId], references: [id])
+  seasonId   String
+  RaceResult RaceResult[]
+}
+
+model Season {
+  id          String           @id @default(cuid())
+  year        Int
+  drivers     TeamMembership[]
+  seasonRaces SeasonRace[]
+}
+
+model SeasonRace {
+  id                 String       @id @default(cuid())
+  name               String
+  circuit            String
+  country            String
+  season             Season       @relation(fields: [seasonId], references: [id])
+  seasonId           String
+  poleDate           DateTime     @default(now())
+  raceDate           DateTime     @default(now())
+  isSprint           Boolean      @default(false)
+  sprintDate         DateTime?
+  sprintShootoutDate DateTime?
+  raceResults        RaceResult[]
+}
+
+model RaceResult {
+  id                   String         @id @default(cuid())
+  position             Int
+  timeInRace           Float
+  fastestLap           Float?
+  polePosition         Int
+  timeInPole           Float
+  sprintShootout       Int?
+  timeInSprintShootout Float?
+  sprint               Int?
+  timeInSprint         Float?
+  seasonRace           SeasonRace     @relation(fields: [seasonRaceId], references: [id])
+  seasonRaceId         String
+  driver               Driver         @relation(fields: [driverId], references: [id])
+  driverId             String
+  teamMembership       TeamMembership @relation(fields: [teamMembershipId], references: [id])
+  teamMembershipId     String
+}
