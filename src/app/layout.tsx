@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   description: 'Compare the performance of F1 teammates throughout a season.'
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: ReactNode
