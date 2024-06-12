@@ -14,8 +14,10 @@ export const InfoCard = ({ label, value, className }: InfoCardProps) => {
         className
       )}
     >
-      <span className='text-xs uppercase text-zinc-300'>{label}</span>
-      <p className='mt-2 text-xl font-bold tabular-nums'>
+      <span className='text-[10px] uppercase text-zinc-300 md:text-xs'>
+        {label}
+      </span>
+      <p className='mt-2 text-sm font-bold tabular-nums md:text-xl'>
         {value === 0 ? '—' : value}
       </p>
     </div>

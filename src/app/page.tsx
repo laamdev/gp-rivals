@@ -56,8 +56,8 @@ export default async function HomePage() {
     <MaxWidthWrapper>
       <section>
         <div className='flex flex-col items-center gap-y-4'>
-          <h1 className='text-center font-serif text-7xl'>{`GP Rivals`}</h1>
-          <p className='max-w-prose text-balance text-center text-lg text-zinc-300'>{`Compare and visualize the performance of F1 teammates at individual races or throughout a full season.`}</p>
+          <h1 className='text-center font-serif text-5xl md:text-7xl'>{`GP Rivals`}</h1>
+          <p className='max-w-prose text-balance text-center text-base text-zinc-300 md:text-lg'>{`Compare and visualize the performance of F1 teammates at individual races or throughout a full season.`}</p>
         </div>
       </section>
       <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3'>
