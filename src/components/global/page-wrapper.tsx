@@ -5,5 +5,5 @@ interface PageWrapperProps {
 }
 
 export const PageWrapper = ({ children }: PageWrapperProps) => {
-  return <main className='py-16'>{children}</main>
+  return <main className='mb-16'>{children}</main>
 }

@@ -13,6 +13,7 @@ model Driver {
   firstName         String
   lastName          String
   nameId            String           @unique
+  pictureUrl        String?
   dateOfBirth       DateTime
   nationality       String
   carNumber         Int
@@ -33,7 +34,12 @@ model Team {
   id                String           @id @default(cuid())
   name              String
   base              String
-  teamPrincipal     String
+  teamChief         String
+  technicalChief    String
+  chassis           String
+  powerUnit         String
+  color             String           @default("#ffffff")
+  firstEntry        Int
   championshipsWon  Int              @default(0)
   racesParticipated Int              @default(0)
   wins              Int              @default(0)
@@ -47,14 +53,14 @@ model Team {
 }
 
 model TeamMembership {
-  id         String       @id @default(cuid())
-  driver     Driver       @relation(fields: [driverId], references: [id])
-  driverId   String
-  team       Team         @relation(fields: [teamId], references: [id])
-  teamId     String
-  season     Season       @relation(fields: [seasonId], references: [id])
-  seasonId   String
-  RaceResult RaceResult[]
+  id          String       @id @default(cuid())
+  driver      Driver       @relation(fields: [driverId], references: [id])
+  driverId    String
+  team        Team         @relation(fields: [teamId], references: [id])
+  teamId      String
+  season      Season       @relation(fields: [seasonId], references: [id])
+  seasonId    String
+  raceResults RaceResult[]
 }
 
 model Season {
@@ -83,9 +89,10 @@ model RaceResult {
   id                   String         @id @default(cuid())
   position             Int
   timeInRace           Float
-  fastestLap           Float?
+  fastestLap           Float
   polePosition         Int
   timeInPole           Float
+  topSpeed             Float          @default(0)
   sprintShootout       Int?
   timeInSprintShootout Float?
   sprint               Int?

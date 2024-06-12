@@ -25,6 +25,32 @@ export const getTeamMemberships = async () => {
   return res
 }
 
+export const getTeamMembership = async ({ teamName, year }) => {
+  const res = await prisma.team.findFirst({
+    where: {
+      name: {
+        equals: teamName,
+        mode: 'insensitive'
+      }
+    },
+    include: {
+      drivers: {
+        include: {
+          team: true,
+          driver: true,
+          raceResults: {
+            include: {
+              teamMembership: true
+            }
+          }
+        }
+      }
+    }
+  })
+
+  return res
+}
+
 export const getSeason = async () => {
   const res = await prisma.season.findMany({
     include: {
