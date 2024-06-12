@@ -2,8 +2,8 @@
 const nextConfig = {
   experimental: {
     reactCompiler: true,
-    ppr: 'incremental',
-    after: true
+    // // ppr: 'incremental',
+    // // after: true
   },
   eslint: {
     ignoreDuringBuilds: true
