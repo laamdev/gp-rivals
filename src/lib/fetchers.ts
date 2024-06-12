@@ -1,5 +1,3 @@
-'server only'
-
 import prisma from '@/lib/db'
 
 export const getDrivers = async () => {
