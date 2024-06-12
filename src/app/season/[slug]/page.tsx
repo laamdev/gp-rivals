@@ -21,13 +21,11 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
 
   const data = await getTeamMembership({ teamName, year })
 
-  console.log(data)
-
   if (!data) {
     return null
   }
 
-  const drivers = data.drivers.map(driver => {
+  const drivers = data?.drivers.map(driver => {
     let totalPosition = 0
     let totalPolePosition = 0
     let totalSprintShootout = 0
