@@ -20,6 +20,11 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
   const teamName = slugParts.join(' ')
 
   const data = await getTeamMembership({ teamName, year })
+
+  if (!data) {
+    return null
+  }
+
   const drivers = data.drivers.map(driver => {
     let totalPosition = 0
     let totalPolePosition = 0
@@ -32,8 +37,8 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
     driver.raceResults.forEach(result => {
       totalPosition += result.position
       totalPolePosition += result.polePosition
-      totalSprintShootout += result.sprintShootout
-      totalSprint += result.sprint
+      totalSprintShootout += result.sprintShootout ?? 0
+      totalSprint += result.sprint ?? 0
       totalTimeInRace += result.timeInRace
       totalFastestLap += result.fastestLap
     })
@@ -57,10 +62,6 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
       averageFastestLap
     }
   })
-
-  if (!data) {
-    return null
-  }
 
   return (
     <MaxWidthWrapper>
