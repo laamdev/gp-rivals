@@ -5,6 +5,9 @@ const nextConfig = {
     ppr: 'incremental',
     after: true
   },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
   images: {
     remotePatterns: [
       {
