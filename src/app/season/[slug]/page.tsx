@@ -21,6 +21,8 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
 
   const data = await getTeamMembership({ teamName, year })
 
+  console.log(data)
+
   if (!data) {
     return null
   }
