@@ -42,7 +42,7 @@ const f1Wide = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'GP Team Rivals',
+  title: 'GP Rivals',
   description: 'Compare the performance of F1 teammates throughout a season.'
 }
 

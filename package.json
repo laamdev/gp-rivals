@@ -12,34 +12,45 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "5.15.0",
+    "@prisma/client": "5.16.2",
+    "@radix-ui/react-select": "^2.1.1",
     "babel-plugin-react-compiler": "0.0.0-experimental-938cd9a-20240601",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.407.0",
     "next": "15.0.0-rc.0",
     "react": "19.0.0-rc-a26e3f403e-20240611",
     "react-dom": "19.0.0-rc-a26e3f403e-20240611",
+    "react-is": "19.0.0-beta-26f2496093-20240514",
+    "recharts": "2.13.0-alpha.4",
     "slugify": "^1.6.6",
-    "tailwind-merge": "^2.3.0"
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/parser": "^7.13.0",
-    "eslint": "^9.4.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": "^9.6.0",
     "eslint-config-next": "15.0.0-rc.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.34.2",
+    "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-compiler": "0.0.0-experimental-51a85ea-20240601",
-    "eslint-plugin-simple-import-sort": "^12.1.0",
-    "eslint-plugin-tailwindcss": "^3.17.3",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-tailwindcss": "^3.17.4",
     "postcss": "^8",
     "prettier": "^3.3.2",
     "prettier-plugin-packagejson": "^2.5.0",
-    "prettier-plugin-tailwindcss": "^0.6.3",
-    "prisma": "^5.15.0",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "prisma": "^5.16.2",
     "tailwindcss": "^3.4.4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "react-is": "^19.0.0-beta-26f2496093-20240514"
+    }
   }
 }
