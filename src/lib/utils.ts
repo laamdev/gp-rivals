@@ -12,122 +12,176 @@ export const getPercentage = (value, total) => {
 export const calculatePoints = (
   position,
   raceType = 'grandPrix',
-  raceCompletionPercentage = 100
+  raceCompletionPercentage = 100,
+  isFastestLap = false
 ) => {
+  let points = 0
+
   if (raceType === 'grandPrix') {
     if (raceCompletionPercentage < 25) {
       switch (position) {
         case 1:
-          return 6
+          points = 6
+          break
         case 2:
-          return 4
+          points = 4
+          break
         case 3:
-          return 3
+          points = 3
+          break
         case 4:
-          return 2
+          points = 2
+          break
         case 5:
-          return 1
+          points = 1
+          break
         default:
-          return 0
+          points = 0
       }
     } else if (raceCompletionPercentage < 50) {
       switch (position) {
         case 1:
-          return 13
+          points = 13
+          break
         case 2:
-          return 10
+          points = 10
+          break
         case 3:
-          return 8
+          points = 8
+          break
         case 4:
-          return 6
+          points = 6
+          break
         case 5:
-          return 5
+          points = 5
+          break
         case 6:
-          return 4
+          points = 4
+          break
         case 7:
-          return 3
+          points = 3
+          break
         case 8:
-          return 2
+          points = 2
+          break
         case 9:
-          return 1
+          points = 1
+          break
         default:
-          return 0
+          points = 0
       }
     } else if (raceCompletionPercentage < 75) {
       switch (position) {
         case 1:
-          return 19
+          points = 19
+          break
         case 2:
-          return 14
+          points = 14
+          break
         case 3:
-          return 12
+          points = 12
+          break
         case 4:
-          return 9
+          points = 9
+          break
         case 5:
-          return 8
+          points = 8
+          break
         case 6:
-          return 6
+          points = 6
+          break
         case 7:
-          return 5
+          points = 5
+          break
         case 8:
-          return 3
+          points = 3
+          break
         case 9:
-          return 2
+          points = 2
+          break
         case 10:
-          return 1
+          points = 1
+          break
         default:
-          return 0
+          points = 0
       }
     } else {
       switch (position) {
         case 1:
-          return 25
+          points = 25
+          break
         case 2:
-          return 18
+          points = 18
+          break
         case 3:
-          return 15
+          points = 15
+          break
         case 4:
-          return 12
+          points = 12
+          break
         case 5:
-          return 10
+          points = 10
+          break
         case 6:
-          return 8
+          points = 8
+          break
         case 7:
-          return 6
+          points = 6
+          break
         case 8:
-          return 4
+          points = 4
+          break
         case 9:
-          return 2
+          points = 2
+          break
         case 10:
-          return 1
+          points = 1
+          break
         default:
-          return 0
+          points = 0
       }
+    }
+
+    // Add an extra point if isFastestLap is true and position is within the first 10
+    if (isFastestLap && position <= 10) {
+      points += 1
     }
   } else if (raceType === 'sprint') {
     switch (position) {
       case 1:
-        return 8
+        points = 8
+        break
       case 2:
-        return 7
+        points = 7
+        break
       case 3:
-        return 6
+        points = 6
+        break
       case 4:
-        return 5
+        points = 5
+        break
       case 5:
-        return 4
+        points = 4
+        break
       case 6:
-        return 3
+        points = 3
+        break
       case 7:
-        return 2
+        points = 2
+        break
       case 8:
-        return 1
+        points = 1
+        break
       default:
-        return 0
+        points = 0
     }
   } else {
-    return 0
+    points = 0
   }
+
+  return points
 }
 
 export const currentYear = new Date().getFullYear()
+
+export const currentDate = new Date()

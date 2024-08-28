@@ -1,5 +1,7 @@
 import Link from 'next/link'
+
 import { NavLink } from './nav-link'
+
 import { getSeasonsYear } from '@/lib/fetchers'
 
 export const Header = async () => {
@@ -18,7 +20,7 @@ export const Header = async () => {
             <NavLink
               key={season.year}
               href={`/season/${season.year}`}
-              isActiveFilter={String(season.year)}
+              activeFilter={String(season.year)}
             >
               {season.year}
             </NavLink>

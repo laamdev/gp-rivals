@@ -16,11 +16,24 @@ export const getSeasonsYear = async () => {
   return res
 }
 
+export const getTeams = async () => {
+  const res = await prisma.team.findMany({
+    include: {
+      drivers: true
+    }
+  })
+
+  return res
+}
+
 export const getTeamMemberships = async seasonYear => {
   const res = await prisma.teamMembership.findMany({
     where: {
       season: {
         year: seasonYear
+      },
+      mainDriver: {
+        equals: true
       }
     },
     include: {
@@ -33,24 +46,82 @@ export const getTeamMemberships = async seasonYear => {
   return res
 }
 
-export const getTeamMembership = async ({ teamName, year }) => {
-  const res = await prisma.team.findFirst({
+export const getTeamMembershipGP = async ({ teamName, year, raceCountry }) => {
+  const res = await prisma.teamMembership.findMany({
     where: {
-      name: {
-        equals: teamName,
-        mode: 'insensitive'
+      team: {
+        name: {
+          equals: teamName,
+          mode: 'insensitive'
+        }
+      },
+      mainDriver: {
+        equals: true
+      },
+      season: {
+        year: {
+          equals: year
+        }
       }
     },
     include: {
-      drivers: {
+      season: {
+        select: {
+          year: true
+        }
+      },
+      driver: {
         include: {
-          team: true,
-          driver: true,
           raceResults: {
+            where: {
+              seasonRace: {
+                season: {
+                  year: year
+                },
+                country: {
+                  equals: raceCountry,
+                  mode: 'insensitive'
+                }
+              }
+            },
             include: {
-              teamMembership: true
+              seasonRace: true
             }
           }
+        }
+      },
+      team: true
+    }
+  })
+
+  return res
+}
+
+export const getTeamMembership = async ({ teamName, year }) => {
+  const res = await prisma.teamMembership.findMany({
+    where: {
+      team: {
+        name: {
+          equals: teamName,
+          mode: 'insensitive'
+        }
+      },
+      mainDriver: {
+        equals: true
+      },
+      season: {
+        year: {
+          equals: year
+        }
+      }
+    },
+    include: {
+      driver: true,
+      team: true,
+      season: true,
+      raceResults: {
+        include: {
+          seasonRace: true
         }
       }
     }
@@ -83,6 +154,16 @@ export const getSeason = async ({ year }) => {
   return res
 }
 
+export const getSeasons = async () => {
+  const res = await prisma.season.findMany({
+    select: {
+      year: true
+    }
+  })
+
+  return res
+}
+
 export const getSeasonRaces = async ({ year }) => {
   const res = await prisma.season.findFirst({
     where: {
@@ -92,7 +173,147 @@ export const getSeasonRaces = async ({ year }) => {
       seasonRaces: {
         select: {
           id: true,
-          country: true
+          country: true,
+          startDate: true
+        }
+      }
+    }
+  })
+
+  return res
+}
+
+export const getHistoricalRivalries = async () => {
+  const res = await prisma.historicalRivalry.findMany({
+    include: {
+      drivers: {
+        orderBy: {
+          lastName: 'asc'
+        }
+      },
+      teamSeasons: {
+        orderBy: {
+          season: {
+            year: 'asc'
+          }
+        }
+      },
+      team: true,
+      driversSeasons: {
+        orderBy: {
+          driver: {
+            lastName: 'asc'
+          }
+        },
+        include: {
+          driver: true
+        }
+      }
+    }
+  })
+
+  return res
+}
+
+export const getHistoricalRivalryYears = async ({ rivalry }) => {
+  const res = await prisma.historicalRivalry.findFirst({
+    where: {
+      slug: rivalry
+    },
+    include: {
+      teamSeasons: {
+        orderBy: {
+          season: {
+            year: 'asc'
+          }
+        },
+        select: {
+          season: {
+            select: {
+              year: true
+            }
+          }
+        }
+      }
+    }
+  })
+
+  return res
+}
+
+export const getHistoricalRivalry = async ({ rivalry }) => {
+  const res = await prisma.historicalRivalry.findFirst({
+    where: {
+      slug: rivalry
+    },
+    include: {
+      drivers: {
+        orderBy: {
+          lastName: 'asc'
+        }
+      },
+      teamSeasons: {
+        orderBy: {
+          season: {
+            year: 'asc'
+          }
+        },
+        include: {
+          season: true
+        }
+      },
+      team: true,
+      driversSeasons: {
+        orderBy: {
+          driver: {
+            lastName: 'asc'
+          }
+        },
+        include: {
+          driver: true
+        }
+      }
+    }
+  })
+
+  return res
+}
+
+export const getHistoricalRivalrySeason = async ({ rivalry, year }) => {
+  const res = await prisma.historicalRivalry.findFirst({
+    where: {
+      slug: rivalry
+    },
+    include: {
+      drivers: {
+        orderBy: {
+          lastName: 'asc'
+        }
+      },
+      team: true,
+      teamSeasons: {
+        orderBy: {
+          season: {
+            year: 'asc'
+          }
+        },
+        where: {
+          season: {
+            year: Number(year)
+          }
+        },
+        include: {
+          driversSeasons: {
+            orderBy: {
+              driver: {
+                lastName: 'asc'
+              }
+            },
+            include: {
+              driver: true
+            }
+          },
+          season: true
         }
       }
     }

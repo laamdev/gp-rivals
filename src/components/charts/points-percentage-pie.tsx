@@ -28,6 +28,7 @@ interface PointsPercentagePieProps {
   teammateBName: string
   year: number
   color: string
+  secondaryColor: string
 }
 
 export const PointsPercentagePie = ({
@@ -37,7 +38,8 @@ export const PointsPercentagePie = ({
   teammateAName,
   teammateBName,
   year,
-  color
+  color,
+  secondaryColor
 }: PointsPercentagePieProps) => {
   // // const totalVisitors = React.useMemo(() => {
   // //   return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
@@ -45,7 +47,7 @@ export const PointsPercentagePie = ({
 
   const chartData = [
     { driver: 'teammateA', points: teammateAPoints, fill: color },
-    { driver: 'teammateB', points: teammateBPoints, fill: '#f4f4f5' }
+    { driver: 'teammateB', points: teammateBPoints, fill: secondaryColor }
   ]
 
   const chartConfig = {
@@ -58,7 +60,7 @@ export const PointsPercentagePie = ({
     },
     teammateB: {
       label: teammateBName,
-      color: '#f4f4f5'
+      color: secondaryColor
     }
   } satisfies ChartConfig
 
@@ -67,8 +69,8 @@ export const PointsPercentagePie = ({
   return (
     <Card className='flex flex-col'>
       <CardHeader className='items-center pb-0'>
-        <CardTitle>{teamName}</CardTitle>
-        <CardDescription>2024</CardDescription>
+        <CardTitle>{`Percentage of ${teamName}'s points`}</CardTitle>
+        <CardDescription>{year} season</CardDescription>
       </CardHeader>
 
       <CardContent className='flex-1 pb-0'>
@@ -125,12 +127,12 @@ export const PointsPercentagePie = ({
       <CardFooter className='flex-col gap-2 text-sm'>
         <div className='flex items-center gap-2 font-medium leading-none'>
           {teammateAPoints > teammateBPoints
-            ? `${teammateAName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of the team's points`
-            : `${teammateBName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of the team's points`}
+            ? `${teammateAName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of ${teamName}'s points`
+            : `${teammateBName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of ${teamName}'s points`}
           <TrophyIcon
             className='h-4 w-4'
             style={{
-              color: teammateAPoints > teammateBPoints ? color : '#f4f4f5'
+              color: teammateAPoints > teammateBPoints ? color : secondaryColor
             }}
           />
         </div>

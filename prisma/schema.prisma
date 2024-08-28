@@ -31,25 +31,14 @@ model Driver {
 }
 
 model Team {
-  id                String           @id @default(cuid())
-  name              String
-  base              String
-  teamChief         String
-  technicalChief    String
-  chassis           String
-  powerUnit         String
-  color             String           @default("#ffffff")
-  firstEntry        Int
-  championshipsWon  Int              @default(0)
-  racesParticipated Int              @default(0)
-  wins              Int              @default(0)
-  podiums           Int              @default(0)
-  poles             Int              @default(0)
-  fastestLaps       Int              @default(0)
-  points            Float            @default(0)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  drivers           TeamMembership[]
+  id             String           @id @default(cuid())
+  name           String
+  color          String           @default("#fff")
+  secondaryColor String           @default("#000")
+  logo           String           @default("")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  drivers        TeamMembership[]
 }
 
 model TeamMembership {
@@ -60,6 +49,8 @@ model TeamMembership {
   teamId      String
   season      Season       @relation(fields: [seasonId], references: [id])
   seasonId    String
+  mainDriver  Boolean      @default(false)
+  pictureUrl  String?
   raceResults RaceResult[]
 }
 
@@ -71,36 +62,120 @@ model Season {
 }
 
 model SeasonRace {
-  id                 String       @id @default(cuid())
-  name               String
-  circuit            String
-  country            String
-  season             Season       @relation(fields: [seasonId], references: [id])
-  seasonId           String
-  poleDate           DateTime     @default(now())
-  raceDate           DateTime     @default(now())
-  isSprint           Boolean      @default(false)
-  sprintDate         DateTime?
-  sprintShootoutDate DateTime?
-  raceResults        RaceResult[]
+  id          String       @id @default(cuid())
+  name        String
+  circuit     String
+  country     String
+  season      Season       @relation(fields: [seasonId], references: [id])
+  seasonId    String
+  startDate   DateTime     @default(now())
+  endDate     DateTime     @default(now())
+  isSprint    Boolean      @default(false)
+  raceResults RaceResult[]
 }
 
 model RaceResult {
-  id                   String         @id @default(cuid())
-  position             Int
-  timeInRace           Float
-  fastestLap           Float
-  polePosition         Int
-  timeInPole           Float
-  topSpeed             Float          @default(0)
-  sprintShootout       Int?
-  timeInSprintShootout Float?
-  sprint               Int?
-  timeInSprint         Float?
-  seasonRace           SeasonRace     @relation(fields: [seasonRaceId], references: [id])
-  seasonRaceId         String
-  driver               Driver         @relation(fields: [driverId], references: [id])
-  driverId             String
-  teamMembership       TeamMembership @relation(fields: [teamMembershipId], references: [id])
-  teamMembershipId     String
+  id                 String         @id @default(cuid())
+  driver             Driver         @relation(fields: [driverId], references: [id])
+  driverId           String
+  position           Int?
+  teamMembership     TeamMembership @relation(fields: [teamMembershipId], references: [id])
+  seasonRace         SeasonRace     @relation(fields: [seasonRaceId], references: [id])
+  time               Float?
+  laps               Int?
+  pitStops           Int?
+  isFastestLap       Boolean        @default(false)
+  fastestLap         Int?
+  fastestLapTime     Float?
+  fastestLapSpeed    Float?
+  qualifyingPosition Int?
+  qualifyingTime     Float?
+  sprintPosition     Int?
+  sprintTime         Float?
+  shootoutPosition   Int?
+  shootoutTime       Float?
+  teamMembershipId   String
+  seasonRaceId       String
+  isDns              Boolean        @default(false)
+  isDnf              Boolean        @default(false)
+  isDsq              Boolean        @default(false)
+}
+
+model HistoricalDriver {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  nameId      String   @unique
+  pictureUrl  String
+  dateOfBirth DateTime
+  nationality String
+
+  driverSeasons       HistoricalDriverSeason[]
+  historicalRivalry   HistoricalRivalry?       @relation(fields: [historicalRivalryId], references: [id])
+  historicalRivalryId String?
+}
+
+model HistoricalDriverSeason {
+  id          String @id @default(cuid())
+  races       Int    @default(0)
+  position    Int    @default(0)
+  points      Float  @default(0)
+  wins        Int    @default(0)
+  poles       Int    @default(0)
+  podiums     Int    @default(0)
+  fastestLaps Int    @default(0)
+
+  driver              HistoricalDriver     @relation(fields: [driverId], references: [id])
+  season              HistoricalSeason     @relation(fields: [seasonId], references: [id])
+  teamSeason          HistoricalTeamSeason @relation(fields: [teamSeasonId], references: [id])
+  historicalRivalry   HistoricalRivalry    @relation(fields: [historicalRivalryId], references: [id])
+  driverId            String
+  seasonId            String
+  teamSeasonId        String
+  historicalRivalryId String
+}
+
+model HistoricalTeam {
+  id             String @id @default(cuid())
+  name           String
+  logo           String
+  primaryColor   String @default("#fff")
+  secondaryColor String @default("#000")
+
+  teamSeasons       HistoricalTeamSeason[]
+  historicalRivalry HistoricalRivalry[]
+}
+
+model HistoricalTeamSeason {
+  id       String @id @default(cuid())
+  points   Float  @default(0)
+  position Int    @default(0)
+
+  driversSeasons      HistoricalDriverSeason[]
+  team                HistoricalTeam           @relation(fields: [teamId], references: [id])
+  season              HistoricalSeason         @relation(fields: [seasonId], references: [id])
+  historicalRivalry   HistoricalRivalry        @relation(fields: [historicalRivalryId], references: [id])
+  teamId              String
+  seasonId            String
+  historicalRivalryId String
+}
+
+model HistoricalSeason {
+  id         String @id @default(cuid())
+  year       Int    @default(0)
+  racesCount Int    @default(0)
+
+  driversSeasons HistoricalDriverSeason[]
+  teamSeasons    HistoricalTeamSeason[]
+}
+
+model HistoricalRivalry {
+  id   String @id @default(cuid())
+  slug String @unique
+
+  drivers        HistoricalDriver[]
+  team           HistoricalTeam           @relation(fields: [teamId], references: [id])
+  driversSeasons HistoricalDriverSeason[]
+  teamSeasons    HistoricalTeamSeason[]
+  teamId         String
 }
