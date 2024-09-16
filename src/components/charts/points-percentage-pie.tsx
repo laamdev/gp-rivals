@@ -68,11 +68,11 @@ export const PointsPercentagePie = ({
 
   return (
     <Card className='flex flex-col'>
-      <CardHeader className='items-center pb-0'>
-        <CardTitle>{`Percentage of ${teamName}'s points`}</CardTitle>
-        <CardDescription>{year} season</CardDescription>
+      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+        <CardTitle className='w-full text-center font-mono text-xs font-medium tracking-wider text-zinc-300'>
+          {`Points Percentage`}
+        </CardTitle>
       </CardHeader>
-
       <CardContent className='flex-1 pb-0'>
         <ChartContainer
           config={chartConfig}
@@ -125,20 +125,14 @@ export const PointsPercentagePie = ({
         </ChartContainer>
       </CardContent>
       <CardFooter className='flex-col gap-2 text-sm'>
-        <div className='flex items-center gap-2 font-medium leading-none'>
+        <p className='font-medium leading-none'>
           {teammateAPoints > teammateBPoints
             ? `${teammateAName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of ${teamName}'s points`
             : `${teammateBName} has scored ${getPercentage(teammateAPoints, totalPoints)}% of ${teamName}'s points`}
-          <TrophyIcon
-            className='h-4 w-4'
-            style={{
-              color: teammateAPoints > teammateBPoints ? color : secondaryColor
-            }}
-          />
-        </div>
-        <div className='leading-none text-muted-foreground'>
+        </p>
+        {/* <div className='leading-none text-muted-foreground'>
           Showing {teamName}'s points for the {year} season
-        </div>
+        </div> */}
       </CardFooter>
     </Card>
   )

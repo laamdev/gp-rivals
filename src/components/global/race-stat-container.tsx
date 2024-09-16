@@ -17,7 +17,7 @@ export const RaceStatContainer = ({
     <div>
       <CardTitle className='text-center'>{label}</CardTitle>
 
-      <div className={cn('mt-5 grid grid-cols-2 gap-x-5 gap-y-5', className)}>
+      <div className={cn('mt-5 grid grid-cols-2 gap-2.5 md:gap-5', className)}>
         {children}
       </div>
     </div>

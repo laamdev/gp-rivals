@@ -148,7 +148,7 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
         <div className='mt-10 flex flex-col gap-y-10'>
           <RaceStatContainer
             label={`${seasonSlug} Team Stats`}
-            className='grid-cols-4'
+            className='grid-cols-2 md:grid-cols-4'
           >
             <RaceStatCard label='Standing' value={1} />
             <RaceStatCard label='Wins' value={teamWins} />
@@ -162,9 +162,9 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
           <div>
             <RaceStatContainer
               label={`${seasonSlug} Drivers Stats`}
-              className='grid-cols-2 gap-x-10'
+              className='grid-cols-1 gap-x-10 md:grid-cols-2'
             >
-              <div className='col-span-1 grid grid-cols-4'>
+              <div className='col-span-1 grid grid-cols-2 md:grid-cols-4'>
                 <RaceStatCard
                   label='Standing'
                   value={drivers[0].averagePosition}
@@ -173,48 +173,49 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
                 <RaceStatCard
                   label='Wins'
                   value={drivers[0].wins}
-                  className='rounded-b-none rounded-l-none rounded-r-none border border-r-0'
+                  className='rounded-b-none rounded-l-none rounded-r-none rounded-tr-lg border md:rounded-tr-none md:border-r-0'
                 />
                 <RaceStatCard
                   label='Podiums'
                   value={drivers[0].podiums}
-                  className='rounded-b-none rounded-l-none rounded-r-none border border-r-0'
+                  className='rounded-b-none rounded-l-none rounded-r-none border border-r-0 border-t-0 md:border-t'
                 />
                 <RaceStatCard
                   label='Points'
                   value={drivers[0].totalPoints}
-                  className='rounded-b-none rounded-l-none border'
+                  className='rounded-b-none rounded-l-none rounded-tr-none border border-t-0 md:rounded-tr-lg md:border-t'
                 />
                 <div
-                  className='col-span-4 rounded-b-lg border-b border-l border-r p-2.5 text-center font-bold'
+                  className='col-span-2 rounded-b-lg border-b border-l border-r p-2.5 text-center font-bold md:col-span-4'
                   style={{ backgroundColor: teamMembership[0].team.color }}
                 >
                   {drivers[0].code}
                 </div>
               </div>
-              <div className='col-span-1 grid grid-cols-4'>
+
+              <div className='col-span-1 grid grid-cols-2 md:grid-cols-4'>
                 <RaceStatCard
                   label='Standing'
                   value={1}
-                  className='rounded-r-none border-r-0'
+                  className='rounded-b-none rounded-r-none border-r-0'
                 />
                 <RaceStatCard
                   label='Wins'
                   value={drivers[1].wins}
-                  className='rounded-l-none rounded-r-none border border-r-0'
+                  className='rounded-b-none rounded-l-none rounded-r-none rounded-tr-lg border md:rounded-tr-none md:border-r-0'
                 />
                 <RaceStatCard
                   label='Podiums'
                   value={drivers[1].podiums}
-                  className='rounded-l-none rounded-r-none border border-r-0'
+                  className='rounded-b-none rounded-l-none rounded-r-none border border-r-0 border-t-0 md:border-t'
                 />
                 <RaceStatCard
                   label='Points'
                   value={drivers[1].totalPoints}
-                  className='rounded-l-none border'
+                  className='rounded-b-none rounded-l-none rounded-tr-none border border-t-0 md:rounded-tr-lg md:border-t'
                 />
                 <div
-                  className='col-span-4 rounded-b-lg border-b border-l border-r p-2.5 text-center font-bold'
+                  className='col-span-2 rounded-b-lg border-b border-l border-r p-2.5 text-center font-bold md:col-span-4'
                   style={{
                     backgroundColor: teamMembership[0].team.secondaryColor
                   }}
@@ -225,7 +226,10 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
             </RaceStatContainer>
           </div>
 
-          <RaceStatContainer label={`H2H`} className='grid-cols-2 gap-x-10'>
+          <RaceStatContainer
+            label={`H2H`}
+            className='grid-cols-1 gap-x-10 md:grid-cols-2'
+          >
             <div className='col-span-1 grid grid-cols-2'>
               <RaceStatCard
                 label='Race'
@@ -269,7 +273,10 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
             </div>
           </RaceStatContainer>
 
-          <div className='mt-5 grid grid-cols-2 gap-x-10 gap-y-5'>
+          <RaceStatContainer
+            label={`Season Visualizations`}
+            className='grid-cols-1 gap-x-10 md:grid-cols-2'
+          >
             <PointsPercentagePie
               teamName={teamMembership[0].team.name}
               teammateAPoints={drivers[0].totalPoints}
@@ -280,8 +287,9 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               color={teamMembership[0].team.color}
               secondaryColor={teamMembership[0].team.secondaryColor}
             />
+          </RaceStatContainer>
 
-            {/* <SeasonRadarChart
+          {/* <SeasonRadarChart
               teammateAPoints={drivers[0].totalPoints}
               teammateBPoints={drivers[1].totalPoints}
               teammateAName={drivers[0].name}
@@ -290,7 +298,6 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               color={teamMembership[0].team.color}
               secondaryColor={teamMembership[0].team.secondaryColor}
             /> */}
-          </div>
         </div>
       </div>
     </MaxWidthWrapper>
