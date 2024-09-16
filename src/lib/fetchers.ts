@@ -1,5 +1,10 @@
 import prisma from '@/lib/db'
 
+interface DriverPoints {
+  driverId: string
+  totalPoints: number
+}
+
 export const getDrivers = async () => {
   const res = await prisma.driver.findMany()
 
@@ -24,6 +29,54 @@ export const getTeams = async () => {
   })
 
   return res
+}
+
+export const getAllDriversPoints = async ({ year }: { year: number }) => {
+  const driversPoints = await prisma.season.findMany({
+    where: {
+      year
+    },
+    include: {
+      drivers: {
+        select: {
+          id: true,
+          driver: {
+            select: {
+              firstName: true,
+              lastName: true
+            }
+          },
+          raceResults: {
+            select: {
+              position: true,
+              points: true,
+              sprintPoints: true
+            }
+          }
+        }
+      }
+    }
+  })
+
+  // Calculate total points for each driver
+  const driverPoints: DriverPoints[] = driversPoints.flatMap(season =>
+    season.drivers.map(driver => {
+      const totalPoints = driver.raceResults.reduce((acc, result) => {
+        return acc + result.points + (result.sprintPoints ?? 0)
+      }, 0)
+
+      return {
+        driverId: driver.id,
+        driverName: `${driver.driver.firstName} ${driver.driver.lastName}`,
+        totalPoints
+      }
+    })
+  )
+
+  // Sort drivers by total points in descending order
+  driverPoints.sort((a, b) => b.totalPoints - a.totalPoints)
+
+  return driverPoints
 }
 
 export const getTeamMemberships = async seasonYear => {

@@ -78,6 +78,7 @@ model RaceResult {
   id                 String         @id @default(cuid())
   driver             Driver         @relation(fields: [driverId], references: [id])
   driverId           String
+  points             Float          @default(0)
   position           Int?
   teamMembership     TeamMembership @relation(fields: [teamMembershipId], references: [id])
   seasonRace         SeasonRace     @relation(fields: [seasonRaceId], references: [id])
@@ -90,6 +91,7 @@ model RaceResult {
   fastestLapSpeed    Float?
   qualifyingPosition Int?
   qualifyingTime     Float?
+  sprintPoints       Float?
   sprintPosition     Int?
   sprintTime         Float?
   shootoutPosition   Int?

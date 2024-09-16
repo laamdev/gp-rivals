@@ -82,7 +82,6 @@ export default async function TeamSeasonGPPage({
   }
 
   const drivers = await extractRaceResults(teamMembership)
-  console.log(JSON.stringify(drivers, null, 2), 'XXX')
   return (
     <MaxWidthWrapper>
       <section className='mt-8 grid'>
@@ -96,7 +95,13 @@ export default async function TeamSeasonGPPage({
           <div className='grid grid-cols-3 gap-x-5'>
             <RaceStatCard
               label='Position'
-              isBest={drivers[1].position > drivers[0].position ? true : false}
+              // // isBest={drivers[1].position > drivers[0].position ? true : false}
+              isBest={
+                drivers[1].position === null ||
+                drivers[1].position > drivers[0].position
+                  ? true
+                  : false
+              }
               color={drivers[0].color}
               value={
                 drivers[0].position
@@ -114,7 +119,12 @@ export default async function TeamSeasonGPPage({
             />
             <RaceStatCard
               label='Points'
-              isBest={drivers[1].position > drivers[0].position ? true : false}
+              isBest={
+                drivers[1].position === null ||
+                drivers[1].position > drivers[0].position
+                  ? true
+                  : false
+              }
               value={String(calculatePoints(drivers[0].position))}
               delta={
                 calculatePoints(drivers[0].position) -

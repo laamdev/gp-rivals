@@ -10,6 +10,7 @@ interface RaceStatCardProps {
   label: string
   isBest?: boolean
   color?: string
+  secondaryColor?: string
   value: string | number
   delta?: string | number
   className?: string
@@ -24,7 +25,7 @@ export const RaceStatCard = ({
   className
 }: RaceStatCardProps) => {
   return (
-    <Card className={cn('relative', className)}>
+    <Card className={cn('relative', className)} style={{ borderColor: color }}>
       {isBest && (
         <FlagCheckered
           weight='fill'
