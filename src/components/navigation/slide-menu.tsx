@@ -4,8 +4,6 @@ import React, { useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
-import { currentYear } from '@/lib/utils'
-
 export const SlideMenu = () => {
   const [position, setPosition] = useState({
     left: 0,
@@ -24,10 +22,7 @@ export const SlideMenu = () => {
       className='relative mx-auto my-10 flex w-fit rounded-full border-2 border-black bg-white p-1'
     >
       <Tab setPosition={setPosition}>
-        <Link href={`/`}>{`Teams`}</Link>
-      </Tab>
-      <Tab setPosition={setPosition}>
-        <Link href={`/season/${currentYear}`}>{`Seasons`}</Link>
+        <Link href={`/`}>{`Seasons`}</Link>
       </Tab>
       <Tab setPosition={setPosition}>
         <Link href='/legendary-team-rivals'>{`Legendary`}</Link>

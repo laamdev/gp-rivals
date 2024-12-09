@@ -22,10 +22,7 @@ export const SeasonRacesNav = async ({
 
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
-      <NavLink
-        href={`/season/${seasonSlug}/team/${teamSlug}`}
-        activeFilter={teamSlug}
-      >
+      <NavLink href={`/${seasonSlug}/team/${teamSlug}`} activeFilter={teamSlug}>
         Full Season
       </NavLink>
 
@@ -36,7 +33,7 @@ export const SeasonRacesNav = async ({
         return (
           <NavLink
             key={`${race.country}-${race.startDate}`}
-            href={`/season/${seasonSlug}/team/${teamSlug}/gp/${race.Circuit.circuitId}`}
+            href={`/${seasonSlug}/team/${teamSlug}/gp/${race.Circuit.circuitId}`}
             activeFilter={race.Circuit.circuitId}
             disabled={isFutureRace}
           >

@@ -19,7 +19,7 @@ export const Header = async () => {
           return (
             <NavLink
               key={season.year}
-              href={`/season/${season.year}`}
+              href={`/${season.year}`}
               activeFilter={String(season.year)}
             >
               {season.year}

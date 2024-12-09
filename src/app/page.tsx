@@ -1,34 +1,88 @@
+import type { Metadata, ResolvingMetadata } from 'next'
+import Link from 'next/link'
 import Image from 'next/image'
 
-import { MainHeader } from '@/components/global/main-header'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
+import { MainHeader } from '@/components/global/main-header'
+import { SeasonsNav } from '@/components/season/seasons-nav'
 
-import { getTeams } from '@/lib/fetchers'
+import { cn } from '@/lib/utils'
+import { seasons } from '@/data/seasons'
 
-export default async function HomePage() {
-  const teams = await getTeams()
+interface SeasonPageProps {
+  params: Promise<{
+    seasonSlug: string
+  }>
+}
+
+export async function generateMetadata({
+  params
+}: SeasonPageProps): Promise<Metadata> {
+  const { seasonSlug } = await params
+
+  return {
+    title: `${String(seasonSlug)} F1 Season`
+  }
+}
+
+export default async function HomePage({ params }: SeasonPageProps) {
+  const { seasonSlug = '2024' } = params
+
+  const season = seasons.find(season => season.year === Number(seasonSlug))
+
+  if (!season) {
+    return null
+  }
 
   return (
     <MaxWidthWrapper>
       <MainHeader />
 
-      <section className='mt-10 grid grid-cols-4 gap-10'>
-        {teams.map(team => (
-          <div key={team.id}>
-            <div className='relative aspect-square'>
-              <Image
-                src={team.logo}
-                alt={team.name}
-                fill
-                className='rounded-xl bg-zinc-900 object-cover object-center'
-              />
-            </div>
-            <h2 className='mt-5 text-center font-serif text-white'>
-              {team.name}
-            </h2>
-          </div>
-        ))}
-      </section>
+      {/* <SeasonsNav /> */}
+
+      <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2'>
+        {season &&
+          season.teams.map(team => (
+            <Link
+              href={`/${seasonSlug}/team/${team.name.toLocaleLowerCase().split(' ').join('-')}`}
+              key={team.id}
+              className='group'
+            >
+              <ul className={cn('mt-4 grid grid-cols-2')}>
+                {team.drivers.slice(0, 2).map((driver, idx) => (
+                  <li key={driver.id} className='relative'>
+                    <div
+                      className={cn(
+                        'relative overflow-hidden',
+                        idx % 2 === 0 ? 'rounded-tl-2xl' : 'rounded-tr-2xl'
+                      )}
+                      style={{
+                        background: `linear-gradient(to bottom, ${team.primaryColor}, transparent)`
+                      }}
+                    >
+                      <Image
+                        alt={`${driver.firstName} ${driver.lastName}`}
+                        src={driver.pictureUrl ?? ''}
+                        width={320}
+                        height={320}
+                        className={cn(
+                          'transform duration-300',
+                          idx % 2 === 0
+                            ? 'rotate-180 -scale-y-100 group-hover:-scale-y-105 group-hover:scale-x-105'
+                            : 'group-hover:scale-105'
+                        )}
+                      />
+                    </div>
+                    <div className='absolute inset-0 transform bg-black opacity-10 duration-300 group-hover:opacity-0' />
+                  </li>
+                ))}
+              </ul>
+              <h2 className='mt-4 text-center font-serif text-sm font-medium sm:text-base'>
+                {team.name}
+              </h2>
+            </Link>
+          ))}
+      </div>
     </MaxWidthWrapper>
   )
 }

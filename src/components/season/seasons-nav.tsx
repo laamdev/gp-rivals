@@ -12,10 +12,7 @@ export const SeasonsNav = async () => {
   return (
     <section className='mt-10 flex gap-x-5 overflow-x-auto'>
       {seasons.map(season => (
-        <NavLink
-          href={`/season/${season.year}`}
-          activeFilter={String(season.year)}
-        >
+        <NavLink href={`/${season.year}`} activeFilter={String(season.year)}>
           {season.year}
         </NavLink>
       ))}
