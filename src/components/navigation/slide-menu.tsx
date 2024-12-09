@@ -70,6 +70,7 @@ const Cursor = ({ position }) => {
       animate={{
         ...position
       }}
+      // @ts-expect-error
       className='absolute z-0 h-7 rounded-full bg-black md:h-12'
     />
   )

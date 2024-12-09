@@ -185,3 +185,124 @@ export const calculatePoints = (
 export const currentYear = new Date().getFullYear()
 
 export const currentDate = new Date()
+
+export const getTotalCounts = statuses => {
+  return statuses.reduce((total, status) => total + parseInt(status.count), 0)
+}
+
+export const isEqual = (a: number, b: number) => Math.abs(a - b) < 0.0001
+
+export const compareStats = (
+  driverNumber: 1 | 2,
+  d1: number,
+  d2: number,
+  higherIsBetter = false
+) => {
+  if (isEqual(d1, d2)) return 'tie'
+  if (higherIsBetter) {
+    return driverNumber === 1 ? d1 > d2 : d2 > d1
+  }
+  return driverNumber === 1 ? d1 < d2 : d2 < d1
+}
+
+// Add new helper for parsing race times
+const parseTime = (time: string) => {
+  // Remove the '+' prefix if present
+  const cleanTime = time.replace('+', '')
+  // Convert MM:SS.sss to seconds
+  if (cleanTime.includes(':')) {
+    const [mins, secs] = cleanTime.split(':')
+    return Number(mins) * 60 + Number(secs)
+  }
+  // Already in seconds
+  return Number(cleanTime)
+}
+
+// Modify getComparison function to handle race stats
+export const getComparison = (
+  type: string,
+  driverNumber: 1 | 2,
+  result: any
+) => {
+  // Handle race-specific result structure
+  if (result.driverOne && result.driverTwo) {
+    const stats = {
+      position: {
+        d1: Number(result.driverOne.position),
+        d2: Number(result.driverTwo.position),
+        higherIsBetter: false
+      },
+      grid: {
+        d1: Number(result.driverOne.grid),
+        d2: Number(result.driverTwo.grid),
+        higherIsBetter: false
+      },
+      points: {
+        d1: Number(result.driverOne.points),
+        d2: Number(result.driverTwo.points),
+        higherIsBetter: true
+      },
+      laps: {
+        d1: Number(result.driverOne.laps),
+        d2: Number(result.driverTwo.laps),
+        higherIsBetter: true
+      },
+      finishTime: {
+        d1: result.driverOne.finishTime
+          ? parseTime(result.driverOne.finishTime)
+          : Infinity,
+        d2: result.driverTwo.finishTime
+          ? parseTime(result.driverTwo.finishTime)
+          : Infinity,
+        higherIsBetter: false
+      },
+      fastestLap: {
+        d1: Number(result.driverOne.fastestLapRank || Infinity),
+        d2: Number(result.driverTwo.fastestLapRank || Infinity),
+        higherIsBetter: false
+      }
+    }
+
+    const stat = stats[type as keyof typeof stats]
+    if (!stat) return false
+    return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
+  }
+
+  // Fallback to original season stats comparison
+  const seasonStats = {
+    position: {
+      d1: Number(result.driverOnePosition),
+      d2: Number(result.driverTwoPosition),
+      higherIsBetter: false
+    },
+    points: {
+      d1: Number(result.driverOnePoints),
+      d2: Number(result.driverTwoPoints),
+      higherIsBetter: true
+    },
+    wins: {
+      d1: Number(result.driverOneWins),
+      d2: Number(result.driverTwoWins),
+      higherIsBetter: true
+    },
+    poles: {
+      d1: Number(result.driverOnePoles),
+      d2: Number(result.driverTwoPoles),
+      higherIsBetter: true
+    },
+    race: {
+      d1: Number(result.driverOneRaceAverage),
+      d2: Number(result.driverTwoRaceAverage),
+      higherIsBetter: false
+    },
+    qualifying: {
+      d1: Number(result.driverOneQualifyingAverage),
+      d2: Number(result.driverTwoQualifyingAverage),
+      higherIsBetter: false
+    }
+  }
+
+  const stat = seasonStats[type as keyof typeof seasonStats]
+  if (!stat) return false
+  return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
+}

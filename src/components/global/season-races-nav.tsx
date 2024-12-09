@@ -1,4 +1,5 @@
 import { NavLink } from '@/components/navigation/nav-link'
+
 import { getSeasonRaces } from '@/lib/fetchers'
 import { currentDate } from '@/lib/utils'
 
@@ -11,11 +12,13 @@ export const SeasonRacesNav = async ({
   seasonSlug,
   teamSlug
 }: SeasonRacesNavProps) => {
-  const races = await getSeasonRaces({ year: Number(seasonSlug) })
+  const result = await getSeasonRaces({ seasonSlug })
 
-  if (!races) {
+  if (!result) {
     return null
   }
+
+  const { seasonRaces } = result
 
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
@@ -26,18 +29,18 @@ export const SeasonRacesNav = async ({
         Full Season
       </NavLink>
 
-      {races.seasonRaces.map(race => {
-        const raceDate = new Date(race.startDate)
+      {seasonRaces.map(race => {
+        const raceDate = new Date(race.date)
         const isFutureRace = raceDate > currentDate
 
         return (
           <NavLink
             key={`${race.country}-${race.startDate}`}
-            href={`/season/${seasonSlug}/team/${teamSlug}/gp/${race.country.toLowerCase().split(' ').join('-')}`}
-            activeFilter={race.country.toLowerCase().split(' ').join('-')}
+            href={`/season/${seasonSlug}/team/${teamSlug}/gp/${race.Circuit.circuitId}`}
+            activeFilter={race.Circuit.circuitId}
             disabled={isFutureRace}
           >
-            {race.country}
+            {race.raceName}
           </NavLink>
         )
       })}

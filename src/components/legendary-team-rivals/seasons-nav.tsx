@@ -2,32 +2,28 @@ import { NavLink } from '@/components/navigation/nav-link'
 
 import { getHistoricalRivalryYears } from '@/lib/fetchers'
 
-interface SeasonsNavProps {
-  rivalry: string
-}
+export const SeasonsNav = async ({ rivalry }) => {
+  // // const data = await getHistoricalRivalryYears({ rivalry })
 
-export const SeasonsNav = async ({ rivalry }: SeasonsNavProps) => {
-  const data = await getHistoricalRivalryYears({ rivalry })
-
-  if (!data) {
-    return null
-  }
+  // // if (!data) {
+  // //   return null
+  // // }
 
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
       <NavLink
-        href={`/legendary-team-rivals/${rivalry}`}
-        activeFilter={rivalry}
+        href={`/legendary-team-rivals/${rivalry.slug}`}
+        activeFilter={rivalry.slug}
       >
         Overall
       </NavLink>
 
-      {data.teamSeasons.map(teamSeason => (
+      {rivalry.seasons.map(season => (
         <NavLink
-          href={`/legendary-team-rivals/${rivalry}/${teamSeason.season.year}`}
-          activeFilter={String(teamSeason.season.year)}
+          href={`/legendary-team-rivals/${rivalry.slug}/${season.year}`}
+          activeFilter={String(season.year)}
         >
-          {teamSeason.season.year}
+          {season.year}
         </NavLink>
       ))}
     </section>

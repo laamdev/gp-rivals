@@ -1,43 +1,90 @@
 import Image from 'next/image'
 
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
-import { RaceStatCard } from '@/components/global/race-stat-card'
-
-import { getHistoricalRivalrySeason } from '@/lib/fetchers'
-import { cn } from '@/lib/utils'
+import { DriverStatusPieChart } from '@/components/charts/driver-status-pie-chart'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
 
+import { cn, getTotalCounts } from '@/lib/utils'
+import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
+
 interface TeamRivalrySeasonPageProps {
-  params: {
-    rivalry: string
-    year: string
-  }
+  params: Promise<{
+    rivalrySlug: string
+    yearSlug: string
+  }>
 }
 
 export default async function TeamRivalrySeasonPage({
   params
 }: TeamRivalrySeasonPageProps) {
-  const { rivalry, year } = params
+  const { rivalrySlug, yearSlug } = await params
 
-  const data = await getHistoricalRivalrySeason({ rivalry, year })
+  const rivalry = await legendaryTeamRivals.find(
+    ({ slug }) => slug === rivalrySlug
+  )
 
-  if (!data) {
+  if (!rivalry) {
     return null
   }
+
+  const rivalrySeason = await rivalry.seasons.find(
+    ({ year }) => year === Number(yearSlug)
+  )
+
+  if (!rivalrySeason) {
+    return null
+  }
+
+  const teammates = rivalrySlug.split('-vs-')
+  const teammateOne = teammates[0]
+  const teammateTwo = teammates[1]
+
+  const teammateOneStatusResponse = await fetch(
+    `http://ergast.com/api/f1/${rivalrySeason.year}/drivers/${teammateOne}/status.json`
+  )
+
+  if (!teammateOneStatusResponse.ok) return undefined
+
+  const { MRData: teammateOneStatusData } =
+    await teammateOneStatusResponse.json()
+
+  const teammateTwoStatusResponse = await fetch(
+    `http://ergast.com/api/f1/${rivalrySeason.year}/drivers/${teammateTwo}/status.json`
+  )
+
+  if (!teammateTwoStatusResponse.ok) return undefined
+
+  const { MRData: teammateTwoStatusData } =
+    await teammateTwoStatusResponse.json()
+
+  const teammateOneStatus = teammateOneStatusData.StatusTable.Status
+  const teammateTwoStatus = teammateTwoStatusData.StatusTable.Status
+
+  const teammateOneTotal = getTotalCounts(teammateOneStatus)
+  const teammateTwoTotal = getTotalCounts(teammateTwoStatus)
+
+  const driverOneRaceResultResponse = await fetch(
+    `http://ergast.com/api/f1/${rivalrySeason.year}/drivers/${teammateOne}/results.json`
+  )
+
+  if (!driverOneRaceResultResponse.ok) return undefined
+
+  const { MRData: driverOneRaceResultsData } =
+    await driverOneRaceResultResponse.json()
+
+  console.log(JSON.stringify(driverOneRaceResultsData, null, 2), 'YYY')
 
   return (
     <MaxWidthWrapper>
       <section
         className='flex items-center justify-between rounded-t-2xl px-6 pb-24 pt-6'
         style={{
-          background: `linear-gradient(to bottom, ${data.team.primaryColor}, transparent)`
+          background: `linear-gradient(to bottom, ${rivalry.primaryColor}, transparent)`
         }}
       >
         <Image
-          src={data.drivers[0].pictureUrl ?? ''}
-          alt={
-            `${data.drivers[0].firstName} ${data.drivers[0].lastName} ` ?? ''
-          }
+          src={rivalry.drivers[0].pictureUrl}
+          alt={`${rivalry.drivers[0].firstName} ${rivalry.drivers[0].lastName}`}
           width={560}
           height={560}
           className={cn(
@@ -46,15 +93,13 @@ export default async function TeamRivalrySeasonPage({
         />
 
         <div className='flex flex-col items-center'>
-          <h2 className='font-mono text-sm font-medium uppercase tracking-wider text-zinc-100'>{`${data.team.name} •︎ ${year}`}</h2>
-          <h1 className='mt-2.5 text-center font-serif text-sm md:text-5xl'>{`${data.drivers[0].lastName ?? ''} vs ${data.drivers[1].lastName ?? ''}`}</h1>
+          <h2 className='font-mono text-sm font-medium uppercase tracking-wider text-zinc-100'>{`${rivalry.team} •︎ ${yearSlug}`}</h2>
+          <h1 className='mt-2.5 text-center font-serif text-sm md:text-5xl'>{`${rivalry.drivers[0].lastName ?? ''} vs ${rivalry.drivers[1].lastName ?? ''}`}</h1>
         </div>
 
         <Image
-          src={data.drivers[1].pictureUrl ?? ''}
-          alt={
-            `${data.drivers[1].firstName} ${data.drivers[1].lastName} ` ?? ''
-          }
+          src={rivalry.drivers[1].pictureUrl}
+          alt={`${rivalry.drivers[1].firstName} ${rivalry.drivers[1].lastName}`}
           width={560}
           height={560}
           className={cn(
@@ -65,7 +110,30 @@ export default async function TeamRivalrySeasonPage({
 
       <SeasonsNav rivalry={rivalry} />
 
-      <section className='mt-5'>
+      <section className='mt-5 grid grid-cols-2 gap-6'>
+        <DriverStatusPieChart
+          statusData={teammateOneStatus}
+          total={teammateOneTotal}
+          year={Number(yearSlug)}
+        />
+        <DriverStatusPieChart
+          statusData={teammateTwoStatus}
+          total={teammateTwoTotal}
+          year={Number(yearSlug)}
+        />
+      </section>
+
+      {/* <section className='mt-5'>
+        <DriverStatusPieChart
+          teammateOneStatus={teammateOneStatus}
+          teammateTwoStatus={teammateTwoStatus}
+          year={Number(yearSlug)}
+          teammateOne={rivalry.drivers[1].lastName}
+          teammateTwo={rivalry.drivers[0].lastName}
+        />
+      </section> */}
+
+      {/* <section className='mt-5'>
         <div className='grid grid-cols-2 gap-x-20'>
           {data.teamSeasons[0].driversSeasons.map(driversSeason => (
             <div key={driversSeason.id}>
@@ -158,7 +226,7 @@ export default async function TeamRivalrySeasonPage({
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
     </MaxWidthWrapper>
   )
 }

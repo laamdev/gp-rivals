@@ -7,6 +7,7 @@ import { getTeams } from '@/lib/fetchers'
 
 export default async function HomePage() {
   const teams = await getTeams()
+
   return (
     <MaxWidthWrapper>
       <MainHeader />

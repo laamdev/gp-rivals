@@ -4,40 +4,41 @@
 
 @layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #fafafa;
-
-    --card: #0a0a0a;
-    --card-foreground: #fafafa;
-
-    --popover: #0a0a0a;
-    --popover-foreground: #fafafa;
-
-    --primary: #fafafa;
-    --primary-foreground: #0f0f0f;
-    --primary-shadow: #1245e1;
-
-    --secondary: #262626;
-    --secondary-foreground: #fafafa;
-
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-
-    --accent: #262626;
-    --accent-foreground: #fafafa;
-
-    --destructive: #9e1a1a;
+    --background: #0f0e10;
+    --foreground: #e5e4e2;
+    --primary: #e6e6e6;
+    --primary-foreground: #000000;
+    --secondary: #252428;
+    --secondary-foreground: #d9d8d6;
+    --accent: #212121;
+    --accent-foreground: #ffffff;
+    --destructive: #cc2929;
     --destructive-foreground: #fafafa;
+    --muted: #3f3f43;
+    --muted-foreground: #d9d8d6;
+    --card: #1a1919;
+    --card-foreground: #e5e4e2;
+    --popover: #252428;
+    --popover-foreground: #d9d8d6;
+    --border: #333238;
+    --input: #333238;
+    --ring: #e6e6e6;
 
-    --border: #262626;
-    --input: #262626;
-    --ring: #d9d9d9;
-
-    --chart-1: #3399ff;
-    --chart-2: #33cc99;
-    --chart-3: #ff9933;
-    --chart-4: #cc33cc;
-    --chart-5: #ff3399;
+    --chart-1: #e57260; /* Coral red */
+    --chart-2: #2d856f; /* Teal */
+    --chart-3: #1f3947; /* Dark blue */
+    --chart-4: #e5c160; /* Gold */
+    --chart-5: #eba554; /* Orange */
+    --chart-6: #3d9d6c; /* Forest green */
+    --chart-7: #9d3d96; /* Purple */
+    --chart-8: #cc3366; /* Pink */
+    --chart-9: #2d77cc; /* Blue */
+    --chart-10: #ccc82d; /* Yellow */
+    --chart-11: #993366; /* Magenta */
+    --chart-12: #2d7993; /* Dark cyan */
+    --chart-13: #6c9d3d; /* Lime green */
+    --chart-14: #4b3d9d; /* Indigo */
+    --chart-15: #e63358; /* Bright red */
 
     --radius: 0.5rem;
   }
