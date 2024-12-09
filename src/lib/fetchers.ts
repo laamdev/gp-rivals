@@ -4,6 +4,7 @@ interface RaceResult {
   MRData: {
     RaceTable: {
       Races: Array<{
+        raceName: string
         Results: Array<{
           position: string
           grid: string
