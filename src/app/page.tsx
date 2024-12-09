@@ -1,34 +1,14 @@
-import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { MainHeader } from '@/components/global/main-header'
-import { SeasonsNav } from '@/components/season/seasons-nav'
 
 import { cn } from '@/lib/utils'
 import { seasons } from '@/data/seasons'
 
-interface SeasonPageProps {
-  params: Promise<{
-    seasonSlug: string
-  }>
-}
-
-export async function generateMetadata({
-  params
-}: SeasonPageProps): Promise<Metadata> {
-  const { seasonSlug } = await params
-
-  return {
-    title: `${String(seasonSlug)} F1 Season`
-  }
-}
-
-export default async function HomePage({ params }: SeasonPageProps) {
-  const { seasonSlug = '2024' } = params
-
-  const season = seasons.find(season => season.year === Number(seasonSlug))
+export default async function HomePage() {
+  const season = seasons.find(season => season.year === 2024)
 
   if (!season) {
     return null
@@ -44,7 +24,7 @@ export default async function HomePage({ params }: SeasonPageProps) {
         {season &&
           season.teams.map(team => (
             <Link
-              href={`/${seasonSlug}/team/${team.name.toLocaleLowerCase().split(' ').join('-')}`}
+              href={`/2024/team/${team.slug}`}
               key={team.id}
               className='group'
             >

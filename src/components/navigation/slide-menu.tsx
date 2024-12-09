@@ -22,7 +22,7 @@ export const SlideMenu = () => {
       className='relative mx-auto my-10 flex w-fit rounded-full border-2 border-black bg-white p-1'
     >
       <Tab setPosition={setPosition}>
-        <Link href={`/`}>{`Seasons`}</Link>
+        <Link href={`/`}>{`2024`}</Link>
       </Tab>
       <Tab setPosition={setPosition}>
         <Link href='/legendary-team-rivals'>{`Legendary`}</Link>
