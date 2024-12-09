@@ -513,7 +513,11 @@ const getDriverRaceResult = async (
       `http://ergast.com/api/f1/${season}/circuits/${circuit}/drivers/${driver}/results.json`
     )
     const data: RaceResult = await response.json()
-    return data.MRData.RaceTable.Races[0]?.Results[0]
+    const race = data.MRData.RaceTable.Races[0]
+    return {
+      raceName: race?.raceName,
+      result: race?.Results[0]
+    }
   } catch (error) {
     console.error('Error fetching driver race result:', error)
     return undefined
@@ -536,28 +540,29 @@ export const getDriversRaceStats = async ({
     getDriverRaceResult(season, circuit, driverTwo)
   ])
 
-  if (!driverOneStats || !driverTwoStats) return undefined
+  if (!driverOneStats?.result || !driverTwoStats?.result) return undefined
 
   return {
+    raceName: driverOneStats.raceName,
     driverOne: {
-      position: driverOneStats.position,
-      grid: driverOneStats.grid,
-      points: driverOneStats.points,
-      laps: driverOneStats.laps,
-      status: driverOneStats.status,
-      finishTime: driverOneStats.Time?.time,
-      fastestLap: driverOneStats.FastestLap?.Time.time,
-      fastestLapRank: driverOneStats.FastestLap?.rank
+      position: driverOneStats.result.position,
+      grid: driverOneStats.result.grid,
+      points: driverOneStats.result.points,
+      laps: driverOneStats.result.laps,
+      status: driverOneStats.result.status,
+      finishTime: driverOneStats.result.Time?.time,
+      fastestLap: driverOneStats.result.FastestLap?.Time.time,
+      fastestLapRank: driverOneStats.result.FastestLap?.rank
     },
     driverTwo: {
-      position: driverTwoStats.position,
-      grid: driverTwoStats.grid,
-      points: driverTwoStats.points,
-      laps: driverTwoStats.laps,
-      status: driverTwoStats.status,
-      finishTime: driverTwoStats.Time?.time,
-      fastestLap: driverTwoStats.FastestLap?.Time.time,
-      fastestLapRank: driverTwoStats.FastestLap?.rank
+      position: driverTwoStats.result.position,
+      grid: driverTwoStats.result.grid,
+      points: driverTwoStats.result.points,
+      laps: driverTwoStats.result.laps,
+      status: driverTwoStats.result.status,
+      finishTime: driverTwoStats.result.Time?.time,
+      fastestLap: driverTwoStats.result.FastestLap?.Time.time,
+      fastestLapRank: driverTwoStats.result.FastestLap?.rank
     }
   }
 }

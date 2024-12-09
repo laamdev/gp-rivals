@@ -24,10 +24,12 @@ export const StatCard = ({
       />
     ) : null}
     <CardHeader>
-      <CardTitle className='text-sm font-medium text-zinc-400'>
+      <CardTitle className='text-xs font-medium text-zinc-400 sm:text-sm'>
         {title}
       </CardTitle>
     </CardHeader>
-    <CardContent className='font-serif text-3xl font-bold'>{value}</CardContent>
+    <CardContent className='font-serif text-sm font-bold sm:text-3xl'>
+      {value}
+    </CardContent>
   </Card>
 )

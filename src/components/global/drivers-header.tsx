@@ -18,7 +18,7 @@ export const DriversHeader = ({ team }) => {
         className={cn('w-24 rotate-180 -scale-y-100 sm:w-72')}
       />
       <div>
-        <h1 className='text-center font-serif text-sm sm:text-5xl'>{`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}</h1>
+        <h1 className='text-center font-serif text-base sm:text-5xl'>{`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}</h1>
       </div>
       <Image
         src={team.drivers[1].pictureUrl}

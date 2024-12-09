@@ -48,8 +48,6 @@ export default async function TeamSeasonGPPage({
     return <div>No data available</div>
   }
 
-  console.log(result)
-
   return (
     <MaxWidthWrapper>
       <section className='mt-8 grid'>
@@ -59,8 +57,8 @@ export default async function TeamSeasonGPPage({
 
       <div className='mt-16 flex flex-col gap-y-16'>
         <div>
-          <h2 className='text-center text-lg font-bold'>{`${seasonSlug} Season Stats`}</h2>
-          <div className='mt-8 grid grid-cols-2 gap-x-8'>
+          <h2 className='text-center text-lg font-bold'>{`${seasonSlug} ${result.raceName} Stats`}</h2>
+          <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
             <RaceDriverStats driverNumber={1} result={result} />
             <RaceDriverStats driverNumber={2} result={result} />
           </div>
