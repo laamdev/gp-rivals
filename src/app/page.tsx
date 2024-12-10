@@ -28,18 +28,19 @@ export default async function HomePage() {
               key={team.id}
               className='group'
             >
-              <ul className={cn('mt-4 grid grid-cols-2')}>
+              <ul
+                className={cn('mt-4 grid grid-cols-2 rounded-t-xl')}
+                style={{
+                  background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`,
+                  maskImage:
+                    'linear-gradient(to bottom, black 70%, transparent 100%)',
+                  WebkitMaskImage:
+                    'linear-gradient(to bottom, black 70%, transparent 100%)'
+                }}
+              >
                 {team.drivers.slice(0, 2).map((driver, idx) => (
                   <li key={driver.id} className='relative'>
-                    <div
-                      className={cn(
-                        'relative overflow-hidden',
-                        idx % 2 === 0 ? 'rounded-tl-2xl' : 'rounded-tr-2xl'
-                      )}
-                      style={{
-                        background: `linear-gradient(to bottom, ${team.primaryColor}, transparent)`
-                      }}
-                    >
+                    <div className={cn('relative overflow-hidden')}>
                       <Image
                         alt={`${driver.firstName} ${driver.lastName}`}
                         src={driver.pictureUrl ?? ''}

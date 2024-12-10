@@ -1,25 +1,18 @@
 import { NavLink } from '@/components/navigation/nav-link'
 
-import { getSeasonRaces } from '@/lib/fetchers'
 import { currentDate } from '@/lib/utils'
 
 interface SeasonRacesNavProps {
-  seasonSlug: string
   teamSlug: string
+  seasonRaces: any
+  seasonSlug: string
 }
 
 export const SeasonRacesNav = async ({
-  seasonSlug,
-  teamSlug
+  teamSlug,
+  seasonRaces,
+  seasonSlug
 }: SeasonRacesNavProps) => {
-  const result = await getSeasonRaces({ seasonSlug })
-
-  if (!result) {
-    return null
-  }
-
-  const { seasonRaces } = result
-
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
       <NavLink href={`/${seasonSlug}/team/${teamSlug}`} activeFilter={teamSlug}>

@@ -1,402 +1,3 @@
-import prisma from '@/lib/db'
-
-interface RaceResult {
-  MRData: {
-    RaceTable: {
-      Races: Array<{
-        raceName: string
-        Results: Array<{
-          position: string
-          grid: string
-          points: string
-          laps: string
-          status: string
-          Time?: { time: string }
-          FastestLap?: {
-            rank: string
-            Time: { time: string }
-          }
-        }>
-      }>
-    }
-  }
-}
-
-interface DriverPoints {
-  driverId: string
-  totalPoints: number
-}
-
-export const getDrivers = async () => {
-  const res = await prisma.driver.findMany()
-
-  return res
-}
-
-export const getSeasonsYear = async () => {
-  const res = await prisma.season.findMany({
-    select: {
-      year: true
-    }
-  })
-
-  return res
-}
-
-export const getTeams = async () => {
-  const res = await prisma.team.findMany({
-    include: {
-      drivers: true
-    }
-  })
-
-  return res
-}
-
-export const getAllDriversPoints = async ({ year }: { year: number }) => {
-  const driversPoints = await prisma.season.findMany({
-    where: {
-      year
-    },
-    include: {
-      drivers: {
-        select: {
-          id: true,
-          driver: {
-            select: {
-              firstName: true,
-              lastName: true
-            }
-          },
-          raceResults: {
-            select: {
-              position: true,
-              points: true,
-              sprintPoints: true
-            }
-          }
-        }
-      }
-    }
-  })
-
-  // Calculate total points for each driver
-  const driverPoints: DriverPoints[] = driversPoints.flatMap(season =>
-    season.drivers.map(driver => {
-      const totalPoints = driver.raceResults.reduce((acc, result) => {
-        return acc + result.points + (result.sprintPoints ?? 0)
-      }, 0)
-
-      return {
-        driverId: driver.id,
-        driverName: `${driver.driver.firstName} ${driver.driver.lastName}`,
-        totalPoints
-      }
-    })
-  )
-
-  // Sort drivers by total points in descending order
-  driverPoints.sort((a, b) => b.totalPoints - a.totalPoints)
-
-  return driverPoints
-}
-
-export const getTeamMemberships = async seasonYear => {
-  const res = await prisma.teamMembership.findMany({
-    where: {
-      season: {
-        year: seasonYear
-      },
-      mainDriver: {
-        equals: true
-      }
-    },
-    include: {
-      driver: true,
-      team: true,
-      season: true
-    }
-  })
-
-  return res
-}
-
-export const getTeamMembershipGP = async ({ teamName, year, raceCountry }) => {
-  const res = await prisma.teamMembership.findMany({
-    where: {
-      team: {
-        name: {
-          equals: teamName,
-          mode: 'insensitive'
-        }
-      },
-      mainDriver: {
-        equals: true
-      },
-      season: {
-        year: {
-          equals: year
-        }
-      }
-    },
-    include: {
-      season: {
-        select: {
-          year: true
-        }
-      },
-      driver: {
-        include: {
-          raceResults: {
-            where: {
-              seasonRace: {
-                season: {
-                  year: year
-                },
-                country: {
-                  equals: raceCountry,
-                  mode: 'insensitive'
-                }
-              }
-            },
-            include: {
-              seasonRace: true
-            }
-          }
-        }
-      },
-      team: true
-    }
-  })
-
-  return res
-}
-
-export const getTeamMembership = async ({ teamName, year }) => {
-  const res = await prisma.teamMembership.findMany({
-    where: {
-      team: {
-        name: {
-          equals: teamName,
-          mode: 'insensitive'
-        }
-      },
-      mainDriver: {
-        equals: true
-      },
-      season: {
-        year: {
-          equals: year
-        }
-      }
-    },
-    include: {
-      driver: true,
-      team: true,
-      season: true,
-      raceResults: {
-        include: {
-          seasonRace: true
-        }
-      }
-    }
-  })
-
-  return res
-}
-
-export const getSeason = async ({ year }) => {
-  const res = await prisma.season.findMany({
-    where: {
-      year
-    },
-    include: {
-      drivers: true,
-      seasonRaces: {
-        include: {
-          raceResults: {
-            include: {
-              teamMembership: true,
-              driver: true,
-              seasonRace: true
-            }
-          }
-        }
-      }
-    }
-  })
-
-  return res
-}
-
-export const getSeasons = async () => {
-  const res = await prisma.season.findMany({
-    select: {
-      year: true
-    }
-  })
-
-  return res
-}
-
-// // export const getSeasonRaces = async ({ year }) => {
-// //   const res = await prisma.season.findFirst({
-// //     where: {
-// //       year
-// //     },
-// //     include: {
-// //       seasonRaces: {
-// //         select: {
-// //           id: true,
-// //           country: true,
-// //           startDate: true
-// //         }
-// //       }
-// //     }
-// //   })
-
-// //   return res
-// // }
-
-export const getHistoricalRivalries = async () => {
-  const res = await prisma.historicalRivalry.findMany({
-    include: {
-      drivers: {
-        orderBy: {
-          lastName: 'asc'
-        }
-      },
-      teamSeasons: {
-        orderBy: {
-          season: {
-            year: 'asc'
-          }
-        }
-      },
-      team: true,
-      driversSeasons: {
-        orderBy: {
-          driver: {
-            lastName: 'asc'
-          }
-        },
-        include: {
-          driver: true
-        }
-      }
-    }
-  })
-
-  return res
-}
-
-export const getHistoricalRivalryYears = async ({ rivalry }) => {
-  const res = await prisma.historicalRivalry.findFirst({
-    where: {
-      slug: rivalry
-    },
-    include: {
-      teamSeasons: {
-        orderBy: {
-          season: {
-            year: 'asc'
-          }
-        },
-        select: {
-          season: {
-            select: {
-              year: true
-            }
-          }
-        }
-      }
-    }
-  })
-
-  return res
-}
-
-export const getHistoricalRivalry = async ({ rivalry }) => {
-  const res = await prisma.historicalRivalry.findFirst({
-    where: {
-      slug: rivalry
-    },
-    include: {
-      drivers: {
-        orderBy: {
-          lastName: 'asc'
-        }
-      },
-      teamSeasons: {
-        orderBy: {
-          season: {
-            year: 'asc'
-          }
-        },
-        include: {
-          season: true
-        }
-      },
-      team: true,
-      driversSeasons: {
-        orderBy: {
-          driver: {
-            lastName: 'asc'
-          }
-        },
-        include: {
-          driver: true
-        }
-      }
-    }
-  })
-
-  return res
-}
-
-export const getHistoricalRivalrySeason = async ({ rivalry, year }) => {
-  const res = await prisma.historicalRivalry.findFirst({
-    where: {
-      slug: rivalry
-    },
-    include: {
-      drivers: {
-        orderBy: {
-          lastName: 'asc'
-        }
-      },
-      team: true,
-      teamSeasons: {
-        orderBy: {
-          season: {
-            year: 'asc'
-          }
-        },
-        where: {
-          season: {
-            year: Number(year)
-          }
-        },
-        include: {
-          driversSeasons: {
-            orderBy: {
-              driver: {
-                lastName: 'asc'
-              }
-            },
-            include: {
-              driver: true
-            }
-          },
-          season: true
-        }
-      }
-    }
-  })
-
-  return res
-}
-
 // ERGAST API FETCHERS
 
 export const getSeasonRaces = async ({ seasonSlug }) => {
@@ -446,17 +47,46 @@ const calculateAveragePosition = (
   ).toFixed(2)
 }
 
+const comparePositions = (
+  races1: any[],
+  races2: any[],
+  type: 'qualifying' | 'race'
+) => {
+  let driver1Better = 0
+  let driver2Better = 0
+
+  races1.forEach((race1, index) => {
+    const pos1 = Number(
+      type === 'qualifying' ? race1.Results[0].grid : race1.Results[0].position
+    )
+    const pos2 = Number(
+      type === 'qualifying'
+        ? races2[index]?.Results[0].grid
+        : races2[index]?.Results[0].position
+    )
+
+    if (pos1 < pos2) driver1Better++
+    if (pos2 < pos1) driver2Better++
+  })
+
+  return { driver1Better, driver2Better }
+}
+
 const getDriverStats = async (
   seasonSlug: string,
   driverId: string
 ): Promise<DriverStats | undefined> => {
-  const [seasonData, qualifyingData, raceData] = await Promise.all([
+  const [seasonData, qualifyingData, raceData, statusData] = await Promise.all([
     fetchErgastData(`/${seasonSlug}/driverStandings.json`),
     fetchErgastData(`/${seasonSlug}/drivers/${driverId}/qualifying.json`),
-    fetchErgastData(`/${seasonSlug}/drivers/${driverId}/results.json`)
+    fetchErgastData(`/${seasonSlug}/drivers/${driverId}/results.json`),
+    fetchErgastData(`/${seasonSlug}/drivers/${driverId}/status.json`)
   ])
 
-  if (!seasonData || !qualifyingData || !raceData) return undefined
+  if (!seasonData || !qualifyingData || !raceData || !statusData)
+    return undefined
+
+  const status = statusData.StatusTable.Status
 
   const points =
     seasonData.StandingsTable.StandingsLists[0].DriverStandings.find(
@@ -472,7 +102,9 @@ const getDriverStats = async (
     qualifying: calculateAveragePosition(races, 'qualifying'),
     race: calculateAveragePosition(raceData.RaceTable.Races, 'race'),
     poles,
-    points
+    points,
+    status,
+    races: raceData.RaceTable.Races // Add this line
   }
 }
 
@@ -488,6 +120,18 @@ export const getDriversSeasonStats = async ({
 
   if (!driverOneStats || !driverTwoStats) return undefined
 
+  const raceComparison = comparePositions(
+    driverOneStats.races,
+    driverTwoStats.races,
+    'race'
+  )
+
+  const qualifyingComparison = comparePositions(
+    driverOneStats.races, // using races since it contains qualifying data
+    driverTwoStats.races,
+    'qualifying'
+  )
+
   return {
     driverOneQualifyingAverage: driverOneStats.qualifying,
     driverOneRaceAverage: driverOneStats.race,
@@ -500,7 +144,13 @@ export const getDriversSeasonStats = async ({
     driverOneWins: driverOneStats.points.wins,
     driverTwoWins: driverTwoStats.points.wins,
     driverOnePoles: driverOneStats.poles,
-    driverTwoPoles: driverTwoStats.poles
+    driverTwoPoles: driverTwoStats.poles,
+    driverOneBetterFinishes: raceComparison.driver1Better,
+    driverTwoBetterFinishes: raceComparison.driver2Better,
+    driverOneBetterQualifying: qualifyingComparison.driver1Better,
+    driverTwoBetterQualifying: qualifyingComparison.driver2Better,
+    driverOneStatus: driverOneStats.status,
+    driverTwoStatus: driverTwoStats.status
   }
 }
 
@@ -565,5 +215,30 @@ export const getDriversRaceStats = async ({
       fastestLap: driverTwoStats.result.FastestLap?.Time.time,
       fastestLapRank: driverTwoStats.result.FastestLap?.rank
     }
+  }
+}
+
+export const getTopScoringDriver = async (year: number) => {
+  const driverPoints = await getAllDriversPoints({ year })
+  const topDriver = driverPoints[0]
+
+  return {
+    driverName: topDriver.driverName,
+    points: topDriver.totalPoints
+  }
+}
+
+export const getSeasonChampion = async (season: string) => {
+  const data = await fetchErgastData(`/${season}/driverStandings/1.json`)
+
+  if (!data) return undefined
+
+  const champion = data.StandingsTable.StandingsLists[0].DriverStandings[0]
+
+  return {
+    driverName: `${champion.Driver.givenName} ${champion.Driver.familyName}`,
+    points: Number(champion.points),
+    wins: Number(champion.wins),
+    position: Number(champion.position)
   }
 }

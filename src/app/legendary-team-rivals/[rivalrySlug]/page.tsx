@@ -55,7 +55,7 @@ export default async function TeamRivalryPage({
       <section
         className='flex items-center justify-between rounded-t-2xl px-6 pb-24 pt-6'
         style={{
-          background: `linear-gradient(to bottom, ${rivalry.primaryColor}, transparent)`
+          background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
         }}
       >
         <Image

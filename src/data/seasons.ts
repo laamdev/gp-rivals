@@ -6,7 +6,8 @@ export const seasons = [
         id: 1,
         slug: 'mclaren',
         name: 'McLaren',
-        primaryColor: ' #FF8000',
+        primaryColor: '#FF8000',
+        secondaryColor: '#47C7FC',
         drivers: [
           {
             id: 1,
@@ -34,7 +35,8 @@ export const seasons = [
         id: 2,
         slug: 'ferrari',
         name: 'Ferrari',
-        primaryColor: '#E80020',
+        primaryColor: '#A6051A',
+        secondaryColor: '#FFEB00',
         drivers: [
           {
             id: 1,
@@ -62,7 +64,8 @@ export const seasons = [
         id: 3,
         slug: 'red-bull-racing',
         name: 'Red Bull Racing',
-        primaryColor: '#3671C6',
+        primaryColor: '#223971',
+        secondaryColor: '#CC1E4A',
         drivers: [
           {
             id: 1,
@@ -90,7 +93,9 @@ export const seasons = [
         id: 4,
         slug: 'mercedes',
         name: 'Mercedes',
-        primaryColor: '#27F4D2',
+        primaryColor: '#00A19C',
+        secondaryColor: '#80142B',
+        // // C6C6C6
         drivers: [
           {
             id: 1,
@@ -118,7 +123,8 @@ export const seasons = [
         id: 5,
         slug: 'aston-martin',
         name: 'Aston Martin',
-        primaryColor: '#229971',
+        primaryColor: '#00665E',
+        secondaryColor: '#CEDC00',
         drivers: [
           {
             id: 1,
@@ -146,7 +152,8 @@ export const seasons = [
         id: 6,
         slug: 'alpine',
         name: 'Alpine',
-        primaryColor: '#0093CC',
+        primaryColor: '#005BA9',
+        secondaryColor: '#FD4BC7',
         drivers: [
           {
             id: 1,
@@ -174,7 +181,8 @@ export const seasons = [
         id: 7,
         slug: 'hass',
         name: 'Hass',
-        primaryColor: '#B6BABD',
+        primaryColor: '#DA291C',
+        secondaryColor: '#AEAEAE',
         drivers: [
           {
             id: 1,
@@ -203,6 +211,7 @@ export const seasons = [
         slug: 'rb',
         name: 'RB',
         primaryColor: '#6692FF',
+        secondaryColor: '#D90103',
         drivers: [
           {
             id: 1,
@@ -231,7 +240,8 @@ export const seasons = [
         id: 9,
         slug: 'williams',
         name: 'Williams',
-        primaryColor: '#64C4FF',
+        primaryColor: '#00A3E0',
+        secondaryColor: '#E40046',
         drivers: [
           {
             id: 1,
@@ -260,6 +270,7 @@ export const seasons = [
         slug: 'kick-sauber',
         name: 'kick Sauber',
         primaryColor: '#00e701',
+        secondaryColor: '#4D5559',
         drivers: [
           {
             id: 1,

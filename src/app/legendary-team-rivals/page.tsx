@@ -24,7 +24,7 @@ export default async function HistoricalTeamRivalriesPage() {
           >
             <div
               style={{
-                background: `linear-gradient(to bottom, ${rivalry.primaryColor}, transparent)`
+                background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
               }}
               className={cn(
                 'mt-4 grid grid-cols-2 gap-5 rounded-lg px-4 pb-10 pt-5 md:px-6'

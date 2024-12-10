@@ -24,25 +24,30 @@
     --input: #333238;
     --ring: #e6e6e6;
 
-    --chart-1: #e57260; /* Coral red */
-    --chart-2: #2d856f; /* Teal */
-    --chart-3: #1f3947; /* Dark blue */
-    --chart-4: #e5c160; /* Gold */
-    --chart-5: #eba554; /* Orange */
-    --chart-6: #3d9d6c; /* Forest green */
-    --chart-7: #9d3d96; /* Purple */
-    --chart-8: #cc3366; /* Pink */
-    --chart-9: #2d77cc; /* Blue */
-    --chart-10: #ccc82d; /* Yellow */
-    --chart-11: #993366; /* Magenta */
-    --chart-12: #2d7993; /* Dark cyan */
-    --chart-13: #6c9d3d; /* Lime green */
-    --chart-14: #4b3d9d; /* Indigo */
-    --chart-15: #e63358; /* Bright red */
-
-    --radius: 0.5rem;
+    --chart-1: #e57260;
+    --chart-2: #2d856f;
+    --chart-3: #0c0d0e;
+    --chart-4: #e5c160;
+    --chart-5: #eba554;
+    --chart-6: #3d9d6c;
+    --chart-7: #9d3d96;
+    --chart-8: #cc3366;
+    --chart-9: #2d77cc;
+    --chart-10: #090908;
+    --chart-11: #993366;
+    --chart-12: #2d7993;
+    --chart-13: #6c9d3d;
+    --chart-14: #4b3d9d;
+    --chart-15: #e63358;
+    --chart-muted: #a1a1aa;
+    --chart-completed: #2d856f;
+    --chart-lapped: #2d77cc;
+    --chart-collision: #e5c160;
+    --chart-mechanical: #9d3d96;
+    --chart-other: #e57260;
   }
 }
+
 @layer base {
   * {
     @apply border-border;

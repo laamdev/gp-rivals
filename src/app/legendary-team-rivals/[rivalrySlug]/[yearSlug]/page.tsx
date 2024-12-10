@@ -1,7 +1,6 @@
 import Image from 'next/image'
 
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
-import { DriverStatusPieChart } from '@/components/charts/driver-status-pie-chart'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
 
 import { cn, getTotalCounts } from '@/lib/utils'
@@ -79,7 +78,7 @@ export default async function TeamRivalrySeasonPage({
       <section
         className='flex items-center justify-between rounded-t-2xl px-6 pb-24 pt-6'
         style={{
-          background: `linear-gradient(to bottom, ${rivalry.primaryColor}, transparent)`
+          background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
         }}
       >
         <Image
@@ -109,29 +108,6 @@ export default async function TeamRivalrySeasonPage({
       </section>
 
       <SeasonsNav rivalry={rivalry} />
-
-      <section className='mt-5 grid grid-cols-2 gap-6'>
-        <DriverStatusPieChart
-          statusData={teammateOneStatus}
-          total={teammateOneTotal}
-          year={Number(yearSlug)}
-        />
-        <DriverStatusPieChart
-          statusData={teammateTwoStatus}
-          total={teammateTwoTotal}
-          year={Number(yearSlug)}
-        />
-      </section>
-
-      {/* <section className='mt-5'>
-        <DriverStatusPieChart
-          teammateOneStatus={teammateOneStatus}
-          teammateTwoStatus={teammateTwoStatus}
-          year={Number(yearSlug)}
-          teammateOne={rivalry.drivers[1].lastName}
-          teammateTwo={rivalry.drivers[0].lastName}
-        />
-      </section> */}
 
       {/* <section className='mt-5'>
         <div className='grid grid-cols-2 gap-x-20'>

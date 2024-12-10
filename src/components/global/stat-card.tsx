@@ -28,7 +28,7 @@ export const StatCard = ({
         {title}
       </CardTitle>
     </CardHeader>
-    <CardContent className='font-serif text-sm font-bold sm:text-3xl'>
+    <CardContent className='font-serif text-sm font-bold sm:text-2xl'>
       {value}
     </CardContent>
   </Card>

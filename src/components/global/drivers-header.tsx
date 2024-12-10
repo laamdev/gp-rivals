@@ -1,5 +1,4 @@
 import Image from 'next/image'
-
 import { cn } from '@/lib/utils'
 
 export const DriversHeader = ({ team }) => {
@@ -7,7 +6,10 @@ export const DriversHeader = ({ team }) => {
     <section
       className='flex items-center justify-between rounded-t-2xl'
       style={{
-        background: `linear-gradient(to bottom, ${team.primaryColor}, transparent)`
+        background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`,
+        maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+        WebkitMaskImage:
+          'linear-gradient(to bottom, black 70%, transparent 100%)'
       }}
     >
       <Image
