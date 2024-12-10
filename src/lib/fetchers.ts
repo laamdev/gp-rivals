@@ -31,6 +31,7 @@ interface DriverStats {
     placesGained: number
   }>
   totalPositionsGained: number
+  poleToWinRatio: number
 }
 
 const BASE_URL = 'http://ergast.com/api/f1'
@@ -129,8 +130,16 @@ const getDriverStats = async (
 
   const races = qualifyingData.RaceTable.Races
   const poles = races.filter(
-    race => race.QualifyingResults[0].position === '1'
+    race => race.QualifyingResults?.[0]?.position === '1'
   ).length
+
+  const winsFromPole = raceData.RaceTable.Races.reduce((count, race) => {
+    const startedFromPole = race.Results?.[0]?.grid === '1'
+    const wonRace = race.Results?.[0]?.position === '1'
+    return count + (startedFromPole && wonRace ? 1 : 0)
+  }, 0)
+
+  const poleToWinRatio = poles > 0 ? (winsFromPole / poles) * 100 : 0
 
   return {
     qualifying: calculateAveragePosition(races, 'qualifying'),
@@ -142,7 +151,8 @@ const getDriverStats = async (
     fastestLaps,
     podiums,
     positionChanges,
-    totalPositionsGained
+    totalPositionsGained,
+    poleToWinRatio
   }
 }
 
@@ -196,7 +206,9 @@ export const getDriversSeasonStats = async ({
     driverOneFastestLaps: driverOneStats.fastestLaps,
     driverTwoFastestLaps: driverTwoStats.fastestLaps,
     driverOnePodiums: driverOneStats.podiums,
-    driverTwoPodiums: driverTwoStats.podiums
+    driverTwoPodiums: driverTwoStats.podiums,
+    driverOnePoleToWinRatio: driverOneStats.poleToWinRatio,
+    driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio
   }
 }
 

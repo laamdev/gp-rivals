@@ -63,6 +63,14 @@ export const DriverStats = ({
           ? result.driverOneQualifyingAverage
           : result.driverTwoQualifyingAverage,
       type: 'qualifying'
+    },
+    {
+      title: 'Pole to Win Ratio',
+      value:
+        driverNumber === 1
+          ? `${result.driverOnePoleToWinRatio.toFixed(1)}%`
+          : `${result.driverTwoPoleToWinRatio.toFixed(1)}%`,
+      type: 'poleToWinRatio'
     }
   ]
 

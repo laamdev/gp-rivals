@@ -257,9 +257,14 @@ export const getComparison = (
         higherIsBetter: false
       },
       fastestLap: {
-        d1: Number(result.driverOne.fastestLapRank || Infinity),
-        d2: Number(result.driverTwo.fastestLapRank || Infinity),
-        higherIsBetter: false
+        d1: Number(result.driverOne.fastestLapRank),
+        d2: Number(result.driverTwo.fastestLapRank),
+        higherIsBetter: true
+      },
+      poleToWinRatio: {
+        d1: Number(result.driverOne.poleToWinRation),
+        d2: Number(result.driverTwo.poleToWinRation),
+        higherIsBetter: true
       }
     }
 
@@ -308,6 +313,11 @@ export const getComparison = (
     qualifying: {
       d1: Number(result.driverOneQualifyingAverage),
       d2: Number(result.driverTwoQualifyingAverage),
+      higherIsBetter: false
+    },
+    poleToWinRatio: {
+      d1: Number(result.driverOnePoleToWinRatio),
+      d2: Number(result.driverTwoPoleToWinRatio),
       higherIsBetter: false
     }
   }

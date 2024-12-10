@@ -13,7 +13,6 @@ import {
 } from '@/lib/fetchers'
 import { seasons } from '@/data/seasons'
 import { StatusPieChart } from '@/components/charts/status-pie-chart'
-import { resourceLimits } from 'worker_threads'
 import { PlacesGainBar } from '@/components/charts/places-gained-bar'
 interface TeamSeasonPageProps {
   params: Promise<{
