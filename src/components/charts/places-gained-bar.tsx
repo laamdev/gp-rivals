@@ -45,7 +45,7 @@ export const PlacesGainBar = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{`Places Gained - ${driver}`}</CardTitle>
+        <CardTitle>{`Places Gained / Lost - ${driver}`}</CardTitle>
         <CardDescription>{`${season} Season`}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -116,7 +116,7 @@ export const PlacesGainBar = ({
             )}
           </div>
           <div className='leading-none text-muted-foreground'>
-            {`Total places gained in the ${chartData.length} races of the ${season} season.`}
+            {`Total places gained / lost in the ${chartData.length} races of the ${season} season.`}
           </div>
         </CardFooter>
       </CardContent>
