@@ -3,7 +3,7 @@ import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 
 import { seasons } from '@/data/seasons'
-import { getDriversRaceStats } from '@/lib/fetchers'
+import { getDriversRaceStats, getSeasonRaces } from '@/lib/fetchers'
 import { RaceDriverStats } from '@/components/global/race-driver-stats'
 
 interface TeamSeasonGpPageProps {
@@ -37,6 +37,14 @@ export default async function TeamSeasonGPPage({
     return <div></div>
   }
 
+  const racesResult = await getSeasonRaces({ seasonSlug })
+
+  if (!racesResult) {
+    return null
+  }
+
+  const { seasonRaces } = racesResult
+
   const result = await getDriversRaceStats({
     season: seasonSlug,
     circuit: gpSlug,
@@ -52,7 +60,11 @@ export default async function TeamSeasonGPPage({
     <MaxWidthWrapper>
       <section className='mt-8 grid'>
         <DriversHeader team={team} />
-        <SeasonRacesNav seasonSlug={seasonSlug} teamSlug={teamSlug} />
+        <SeasonRacesNav
+          seasonRaces={seasonRaces}
+          teamSlug={teamSlug}
+          seasonSlug={seasonSlug}
+        />
       </section>
 
       <div className='mt-16 flex flex-col gap-y-16'>

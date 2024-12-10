@@ -1,9 +1,7 @@
 import { NavLink } from '@/components/navigation/nav-link'
 
-import { getSeasons } from '@/lib/fetchers'
-
 export const SeasonsNav = async () => {
-  const seasons = await getSeasons()
+  const seasons = [{ year: 2024 }]
 
   if (!seasons) {
     return null

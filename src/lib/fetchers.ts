@@ -20,6 +20,8 @@ interface DriverStats {
   race: string
   poles: number
   points: any // Replace with proper type from API
+  status: any // Replace with proper type from API
+  races: any[] // Replace with proper type from API
 }
 
 const BASE_URL = 'http://ergast.com/api/f1'
@@ -104,7 +106,7 @@ const getDriverStats = async (
     poles,
     points,
     status,
-    races: raceData.RaceTable.Races // Add this line
+    races: raceData.RaceTable.Races
   }
 }
 
@@ -163,7 +165,7 @@ const getDriverRaceResult = async (
     const response = await fetch(
       `http://ergast.com/api/f1/${season}/circuits/${circuit}/drivers/${driver}/results.json`
     )
-    const data: RaceResult = await response.json()
+    const data = await response.json()
     const race = data.MRData.RaceTable.Races[0]
     return {
       raceName: race?.raceName,
@@ -215,16 +217,6 @@ export const getDriversRaceStats = async ({
       fastestLap: driverTwoStats.result.FastestLap?.Time.time,
       fastestLapRank: driverTwoStats.result.FastestLap?.rank
     }
-  }
-}
-
-export const getTopScoringDriver = async (year: number) => {
-  const driverPoints = await getAllDriversPoints({ year })
-  const topDriver = driverPoints[0]
-
-  return {
-    driverName: topDriver.driverName,
-    points: topDriver.totalPoints
   }
 }
 

@@ -17,38 +17,13 @@ export default async function TeamRivalryPage({
 }: TeamRivalryPageProps) {
   const { rivalrySlug } = await params
 
-  const rivalry = await legendaryTeamRivals.find(
+  const team = await legendaryTeamRivals.find(
     ({ slug }) => slug === rivalrySlug
   )
 
-  if (!rivalry) {
+  if (!team) {
     return null
   }
-
-  const teammates = rivalrySlug.split('-vs-')
-  const teammateOne = teammates[0]
-  const teammateTwo = teammates[1]
-
-  const teammateOneStatusResponse = await fetch(
-    `http://ergast.com/api/f1/1988/drivers/${teammateOne}/status.json`
-  )
-
-  if (!teammateOneStatusResponse.ok) return undefined
-
-  const { MRData: teammateOneStatusData } =
-    await teammateOneStatusResponse.json()
-
-  const teammateTwoStatusResponse = await fetch(
-    `http://ergast.com/api/f1/1988/drivers/${teammateTwo}/status.json`
-  )
-
-  if (!teammateTwoStatusResponse.ok) return undefined
-
-  const { MRData: teammateTwoStatusData } =
-    await teammateTwoStatusResponse.json()
-  getTotalCounts
-  const teammateOneStatus = teammateOneStatusData.StatusTable.Status
-  const teammateTwoStatus = teammateTwoStatusData.StatusTable.Status
 
   return (
     <MaxWidthWrapper>
@@ -59,8 +34,8 @@ export default async function TeamRivalryPage({
         }}
       >
         <Image
-          src={rivalry.drivers[0].pictureUrl}
-          alt={`${rivalry.drivers[0].firstName} ${rivalry.drivers[0].lastName}`}
+          src={team.drivers[0].pictureUrl}
+          alt={`${team.drivers[0].firstName} ${team.drivers[0].lastName}`}
           width={560}
           height={560}
           className={cn(
@@ -69,13 +44,13 @@ export default async function TeamRivalryPage({
         />
 
         <div className='flex flex-col items-center'>
-          <h2 className='font-mono text-sm font-medium uppercase tracking-wider text-zinc-100'>{`${rivalry.team} •︎ ${rivalry.seasons.length} ${rivalry.seasons.length <= 1 ? 'Season' : 'Seasons'}`}</h2>
-          <h1 className='mt-2.5 text-center font-serif text-sm md:text-5xl'>{`${rivalry.drivers[0].lastName ?? ''} vs ${rivalry.drivers[1].lastName ?? ''}`}</h1>
+          <h2 className='font-mono text-sm font-medium uppercase tracking-wider text-zinc-100'>{`${team.team} •︎ ${team.seasons.length} ${team.seasons.length <= 1 ? 'Season' : 'Seasons'}`}</h2>
+          <h1 className='mt-2.5 text-center font-serif text-sm md:text-5xl'>{`${team.drivers[0].lastName ?? ''} vs ${team.drivers[1].lastName ?? ''}`}</h1>
         </div>
 
         <Image
-          src={rivalry.drivers[1].pictureUrl}
-          alt={`${rivalry.drivers[1].firstName} ${rivalry.drivers[1].lastName}`}
+          src={team.drivers[1].pictureUrl}
+          alt={`${team.drivers[1].firstName} ${team.drivers[1].lastName}`}
           width={560}
           height={560}
           className={cn(
@@ -84,7 +59,7 @@ export default async function TeamRivalryPage({
         />
       </section>
 
-      <SeasonsNav rivalry={rivalry} />
+      <SeasonsNav team={team} />
     </MaxWidthWrapper>
   )
 }

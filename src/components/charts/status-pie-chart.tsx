@@ -18,7 +18,12 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart'
 
-export const StatusPieChart = ({ status }) => {
+interface StatusItem {
+  status: string
+  count: string
+}
+
+export const StatusPieChart = ({ status }: { status: StatusItem[] }) => {
   const statusGroups = {
     Completed: ['Finished'],
     Lapped: ['+1 Lap', '+2 Laps', '+7 Laps'],
@@ -47,6 +52,7 @@ export const StatusPieChart = ({ status }) => {
   // Group statuses and sum their counts
   const groupedData = Object.entries(statusGroups).map(([group, statuses]) => {
     const count = status
+      // @ts-expect-error
       .filter(item => statuses.includes(item.status))
       .reduce((sum, item) => sum + parseInt(item.count), 0)
 

@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { MainHeader } from '@/components/global/main-header'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 
-import { getHistoricalRivalries } from '@/lib/fetchers'
 import { cn } from '@/lib/utils'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
 
@@ -16,10 +15,10 @@ export default async function HistoricalTeamRivalriesPage() {
         summary='Explore how these legendary drivers matched up when they shared the same car, and relive the moments that defined their epic battles on the track.'
       />
       <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3'>
-        {legendaryTeamRivals.map(rivalry => (
+        {legendaryTeamRivals.map((team, idx) => (
           <Link
-            key={rivalry.id}
-            href={`/legendary-team-rivals/${rivalry.slug}`}
+            key={idx}
+            href={`/legendary-team-rivals/${team.slug}`}
             className='group'
           >
             <div
@@ -30,7 +29,7 @@ export default async function HistoricalTeamRivalriesPage() {
                 'mt-4 grid grid-cols-2 gap-5 rounded-lg px-4 pb-10 pt-5 md:px-6'
               )}
             >
-              {rivalry.drivers.map(driver => (
+              {team.drivers.map(driver => (
                 <div key={driver.id} className='relative'>
                   <div className={cn('relative overflow-hidden rounded-lg')}>
                     <Image
@@ -48,7 +47,7 @@ export default async function HistoricalTeamRivalriesPage() {
               ))}
             </div>
             <h2 className='-mt-5 text-center font-mono text-lg'>
-              {`${rivalry.drivers[0]?.lastName} vs ${rivalry.drivers[1]?.lastName}`}
+              {`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}
             </h2>
           </Link>
         ))}

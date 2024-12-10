@@ -2,10 +2,8 @@ import Link from 'next/link'
 
 import { NavLink } from './nav-link'
 
-import { getSeasonsYear } from '@/lib/fetchers'
-
 export const Header = async () => {
-  const seasons = await getSeasonsYear()
+  const seasons = [{ year: 2024 }]
 
   return (
     <nav className='flex h-16 items-center justify-between px-4 md:px-16'>
