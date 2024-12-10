@@ -290,6 +290,16 @@ export const getComparison = (
       d2: Number(result.driverTwoPoles),
       higherIsBetter: true
     },
+    fastestLaps: {
+      d1: Number(result.driverOneFastestLaps),
+      d2: Number(result.driverTwoFastestLaps),
+      higherIsBetter: true
+    },
+    podiums: {
+      d1: Number(result.driverOnePodiums),
+      d2: Number(result.driverTwoPodiums),
+      higherIsBetter: true
+    },
     race: {
       d1: Number(result.driverOneRaceAverage),
       d2: Number(result.driverTwoRaceAverage),

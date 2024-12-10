@@ -14,6 +14,7 @@ import {
 import { seasons } from '@/data/seasons'
 import { StatusPieChart } from '@/components/charts/status-pie-chart'
 import { resourceLimits } from 'worker_threads'
+import { PlacesGainBar } from '@/components/charts/places-gained-bar'
 interface TeamSeasonPageProps {
   params: Promise<{
     seasonSlug: string
@@ -55,11 +56,6 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   if (!champion) {
     return null
   }
-
-  // // champion.driverName
-  // // champion.points
-
-  // DRIVER ONE
 
   const result = await getDriversSeasonStats({
     season: seasonSlug,
@@ -137,12 +133,27 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
             />
           </div>
 
-          <section className='mt-8 grid grid-cols-2 gap-8'>
+          <div className='mt-8 grid grid-cols-2 gap-8'>
             <StatusPieChart status={result.driverOneStatus} />
             <StatusPieChart status={result.driverTwoStatus} />
             {/* <DriverStatusRadial statusDetails={result.driverOneStatus} />
             <DriverStatusRadial statusDetails={result.driverTwoStatus} /> */}
-          </section>
+          </div>
+        </div>
+
+        <div className='grid gap-8'>
+          <PlacesGainBar
+            positionChanges={result.driverOnePositionChanges}
+            totalPositionsGained={result.driverOneTotalPositionsGained}
+            driver={team.drivers[0].lastName}
+            season={seasonSlug}
+          />
+          <PlacesGainBar
+            positionChanges={result.driverTwoPositionChanges}
+            totalPositionsGained={result.driverTwoTotalPositionsGained}
+            driver={team.drivers[1].lastName}
+            season={seasonSlug}
+          />
         </div>
       </div>
     </MaxWidthWrapper>

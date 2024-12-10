@@ -19,9 +19,18 @@ interface DriverStats {
   qualifying: string
   race: string
   poles: number
-  points: any // Replace with proper type from API
-  status: any // Replace with proper type from API
-  races: any[] // Replace with proper type from API
+  points: any
+  status: any
+  races: any[]
+  fastestLaps: number
+  podiums: number
+  positionChanges: Array<{
+    race: string
+    grid: number
+    finish: number
+    placesGained: number
+  }>
+  totalPositionsGained: number
 }
 
 const BASE_URL = 'http://ergast.com/api/f1'
@@ -88,12 +97,35 @@ const getDriverStats = async (
   if (!seasonData || !qualifyingData || !raceData || !statusData)
     return undefined
 
+  const fastestLaps = raceData.RaceTable.Races.reduce(
+    (count, race) => count + (race.Results[0].FastestLap?.rank === '1' ? 1 : 0),
+    0
+  )
+
+  const podiums = raceData.RaceTable.Races.reduce(
+    (count, race) => count + (parseInt(race.Results[0].position) <= 3 ? 1 : 0),
+    0
+  )
+
   const status = statusData.StatusTable.Status
 
   const points =
     seasonData.StandingsTable.StandingsLists[0].DriverStandings.find(
       driver => driver.Driver.driverId === driverId
     )
+
+  const positionChanges = raceData.RaceTable.Races.map(race => ({
+    race: race.raceName.replace(' Grand Prix', ' GP'),
+    grid: parseInt(race.Results[0].grid),
+    finish: parseInt(race.Results[0].position),
+    placesGained:
+      parseInt(race.Results[0].grid) - parseInt(race.Results[0].position)
+  }))
+
+  const totalPositionsGained = positionChanges.reduce(
+    (sum, change) => sum + change.placesGained,
+    0
+  )
 
   const races = qualifyingData.RaceTable.Races
   const poles = races.filter(
@@ -106,7 +138,11 @@ const getDriverStats = async (
     poles,
     points,
     status,
-    races: raceData.RaceTable.Races
+    races: raceData.RaceTable.Races,
+    fastestLaps,
+    podiums,
+    positionChanges,
+    totalPositionsGained
   }
 }
 
@@ -152,7 +188,15 @@ export const getDriversSeasonStats = async ({
     driverOneBetterQualifying: qualifyingComparison.driver1Better,
     driverTwoBetterQualifying: qualifyingComparison.driver2Better,
     driverOneStatus: driverOneStats.status,
-    driverTwoStatus: driverTwoStats.status
+    driverTwoStatus: driverTwoStats.status,
+    driverOnePositionChanges: driverOneStats.positionChanges,
+    driverTwoPositionChanges: driverTwoStats.positionChanges,
+    driverOneTotalPositionsGained: driverOneStats.totalPositionsGained,
+    driverTwoTotalPositionsGained: driverTwoStats.totalPositionsGained,
+    driverOneFastestLaps: driverOneStats.fastestLaps,
+    driverTwoFastestLaps: driverTwoStats.fastestLaps,
+    driverOnePodiums: driverOneStats.podiums,
+    driverTwoPodiums: driverTwoStats.podiums
   }
 }
 

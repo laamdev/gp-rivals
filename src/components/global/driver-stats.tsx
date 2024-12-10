@@ -35,6 +35,20 @@ export const DriverStats = ({
       type: 'poles'
     },
     {
+      title: 'Podiums',
+      value:
+        driverNumber === 1 ? result.driverOnePodiums : result.driverTwoPodiums,
+      type: 'podiums'
+    },
+    {
+      title: 'Fastest Laps',
+      value:
+        driverNumber === 1
+          ? result.driverOneFastestLaps
+          : result.driverTwoFastestLaps,
+      type: 'fastestLaps'
+    },
+    {
       title: 'Race Position Average',
       value:
         driverNumber === 1
