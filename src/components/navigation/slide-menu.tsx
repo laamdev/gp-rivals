@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion } from 'motion'
 
 export const SlideMenu = () => {
   const [position, setPosition] = useState({
