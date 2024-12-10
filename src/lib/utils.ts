@@ -260,11 +260,6 @@ export const getComparison = (
         d1: Number(result.driverOne.fastestLapRank),
         d2: Number(result.driverTwo.fastestLapRank),
         higherIsBetter: true
-      },
-      poleToWinRatio: {
-        d1: Number(result.driverOne.poleToWinRation),
-        d2: Number(result.driverTwo.poleToWinRation),
-        higherIsBetter: true
       }
     }
 
@@ -318,7 +313,7 @@ export const getComparison = (
     poleToWinRatio: {
       d1: Number(result.driverOnePoleToWinRatio),
       d2: Number(result.driverTwoPoleToWinRatio),
-      higherIsBetter: false
+      higherIsBetter: true
     }
   }
 
