@@ -259,7 +259,7 @@ export const getComparison = (
       fastestLap: {
         d1: Number(result.driverOne.fastestLapRank),
         d2: Number(result.driverTwo.fastestLapRank),
-        higherIsBetter: true
+        higherIsBetter: false
       }
     }
 
