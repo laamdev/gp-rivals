@@ -1,7 +1,7 @@
 # GP Rivals
 
-Compare and visualize the performance of F1 teammates throughout a full season
-or specific races.
+Compare and visualize the performance of current and legendary F1 teammates
+throughout a full season or specific races.
 
 ## Stack
 
