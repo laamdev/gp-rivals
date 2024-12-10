@@ -35,13 +35,16 @@ export const OverallPerformanceRadar = ({
   driverOneRaceAverage,
   driverTwoRaceAverage,
   driverOneQualifyingAverage,
-  driverTwoQualifyingAverage
+  driverTwoQualifyingAverage,
+  driverOneLapsCompleted,
+  driverTwoLapsCompleted
 }) => {
   const maxValues = {
     'Points (vs. best driver)': bestDriverPoints,
     Points: 672,
     'Average Race Result': 20,
-    'Average Grid Position': 20
+    'Average Grid Position': 20,
+    'Laps Completed': 1444
   }
 
   const chartData = [
@@ -92,6 +95,14 @@ export const OverallPerformanceRadar = ({
       driverOneOriginal: driverOneQualifyingAverage,
       driverTwoOriginal: driverTwoQualifyingAverage,
       maxValue: maxValues['Average Grid Position']
+    },
+    {
+      stat: 'Laps Completed',
+      driverOne: (driverOneLapsCompleted / maxValues['Laps Completed']) * 100,
+      driverTwo: (driverTwoLapsCompleted / maxValues['Laps Completed']) * 100,
+      driverOneOriginal: driverOneLapsCompleted,
+      driverTwoOriginal: driverTwoLapsCompleted,
+      maxValue: maxValues['Laps Completed']
     }
   ]
 

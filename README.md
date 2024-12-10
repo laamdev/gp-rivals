@@ -12,3 +12,6 @@ throughout a full season or specific races.
 - Prisma
 - Neon DB
 - Ergast API
+
+1 - Generate params in dynamic pages 2 - cache experimental 3 - cache fetch
+calls

@@ -1,7 +1,26 @@
 import Image from 'next/image'
+
 import { cn } from '@/lib/utils'
 
-export const DriversHeader = ({ team }) => {
+interface DriversHeaderProps {
+  team: {
+    name: string
+    primaryColor: string
+    secondaryColor: string
+    drivers: {
+      pictureUrl: string
+      lastName: string
+    }[]
+  }
+  season: string
+  raceName?: string
+}
+
+export const DriversHeader = ({
+  team,
+  season,
+  raceName
+}: DriversHeaderProps) => {
   return (
     <section
       className='flex items-center justify-between rounded-t-2xl'
@@ -19,8 +38,11 @@ export const DriversHeader = ({ team }) => {
         height={560}
         className={cn('w-24 rotate-180 -scale-y-100 sm:w-72')}
       />
-      <div>
-        <h1 className='text-center font-serif text-base sm:text-5xl'>{`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}</h1>
+      <div className='flex flex-col items-center gap-y-2'>
+        <h2 className='text-sm font-medium uppercase tracking-widest text-zinc-100 sm:text-base'>
+          {team.name} · {season} {raceName ?? 'Season'}
+        </h2>
+        <h1 className='text-center font-serif text-base font-bold sm:text-5xl'>{`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}</h1>
       </div>
       <Image
         src={team.drivers[1].pictureUrl}

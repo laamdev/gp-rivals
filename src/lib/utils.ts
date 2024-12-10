@@ -314,6 +314,11 @@ export const getComparison = (
       d1: Number(result.driverOnePoleToWinRatio),
       d2: Number(result.driverTwoPoleToWinRatio),
       higherIsBetter: true
+    },
+    pointsPerRace: {
+      d1: Number(result.driverOnePointsPerRace),
+      d2: Number(result.driverTwoPointsPerRace),
+      higherIsBetter: true
     }
   }
 

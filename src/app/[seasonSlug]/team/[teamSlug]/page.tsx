@@ -3,7 +3,6 @@ import { DriversHeader } from '@/components/global/drivers-header'
 import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { DriverStats } from '@/components/global/driver-stats'
 import { HeadToHeadRadial } from '@/components/charts/head-to-head-radial'
-import { DriverStatusRadial } from '@/components/charts/driver-status-radial'
 import { OverallPerformanceRadar } from '@/components/charts/overall-performance-radar'
 
 import {
@@ -69,7 +68,7 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   return (
     <MaxWidthWrapper>
       <section className='mt-8 grid'>
-        <DriversHeader team={team} />
+        <DriversHeader team={team} season={seasonSlug} />
         <SeasonRacesNav
           seasonRaces={seasonRaces}
           teamSlug={teamSlug}
@@ -94,6 +93,8 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               driverTwoRaceAverage={result.driverTwoRaceAverage}
               driverOneQualifyingAverage={result.driverOneQualifyingAverage}
               driverTwoQualifyingAverage={result.driverTwoQualifyingAverage}
+              driverOneLapsCompleted={result.driverOneLapsCompleted}
+              driverTwoLapsCompleted={result.driverTwoLapsCompleted}
             />
           </div>
           <div className='mt-8 grid grid-cols-2 gap-x-8'>

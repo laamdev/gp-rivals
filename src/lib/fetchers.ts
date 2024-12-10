@@ -32,6 +32,9 @@ interface DriverStats {
   }>
   totalPositionsGained: number
   poleToWinRatio: number
+  lapsCompleted: number
+  totalRaces: number
+  pointsPerRace: number
 }
 
 const BASE_URL = 'http://ergast.com/api/f1'
@@ -98,6 +101,8 @@ const getDriverStats = async (
   if (!seasonData || !qualifyingData || !raceData || !statusData)
     return undefined
 
+  const totalRaces = raceData.RaceTable.Races.length
+
   const fastestLaps = raceData.RaceTable.Races.reduce(
     (count, race) => count + (race.Results[0].FastestLap?.rank === '1' ? 1 : 0),
     0
@@ -114,6 +119,10 @@ const getDriverStats = async (
     seasonData.StandingsTable.StandingsLists[0].DriverStandings.find(
       driver => driver.Driver.driverId === driverId
     )
+
+  const pointsPerRace = Number(
+    (parseInt(points.points) / totalRaces).toFixed(1)
+  )
 
   const positionChanges = raceData.RaceTable.Races.map(race => ({
     race: race.raceName.replace(' Grand Prix', ' GP'),
@@ -141,6 +150,10 @@ const getDriverStats = async (
 
   const poleToWinRatio = poles > 0 ? (winsFromPole / poles) * 100 : 0
 
+  const lapsCompleted = raceData.RaceTable.Races.reduce((total, race) => {
+    return total + parseInt(race.Results[0].laps)
+  }, 0)
+
   return {
     qualifying: calculateAveragePosition(races, 'qualifying'),
     race: calculateAveragePosition(raceData.RaceTable.Races, 'race'),
@@ -152,7 +165,10 @@ const getDriverStats = async (
     podiums,
     positionChanges,
     totalPositionsGained,
-    poleToWinRatio
+    poleToWinRatio,
+    lapsCompleted,
+    totalRaces,
+    pointsPerRace
   }
 }
 
@@ -208,7 +224,13 @@ export const getDriversSeasonStats = async ({
     driverOnePodiums: driverOneStats.podiums,
     driverTwoPodiums: driverTwoStats.podiums,
     driverOnePoleToWinRatio: driverOneStats.poleToWinRatio,
-    driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio
+    driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio,
+    driverOneLapsCompleted: driverOneStats.lapsCompleted,
+    driverTwoLapsCompleted: driverTwoStats.lapsCompleted,
+    driverOneTotalRaces: driverOneStats.totalRaces,
+    driverTwoTotalRaces: driverTwoStats.totalRaces,
+    driverOnePointsPerRace: driverOneStats.pointsPerRace,
+    driverTwoPointsPerRace: driverTwoStats.pointsPerRace
   }
 }
 

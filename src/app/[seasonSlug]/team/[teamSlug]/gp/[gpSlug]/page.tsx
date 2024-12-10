@@ -5,6 +5,7 @@ import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { seasons } from '@/data/seasons'
 import { getDriversRaceStats, getSeasonRaces } from '@/lib/fetchers'
 import { RaceDriverStats } from '@/components/global/race-driver-stats'
+import { PrivateResultType } from '@prisma/client/runtime/library'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{
@@ -34,7 +35,7 @@ export default async function TeamSeasonGPPage({
   })()
 
   if (!team) {
-    return <div></div>
+    return null
   }
 
   const racesResult = await getSeasonRaces({ seasonSlug })
@@ -59,7 +60,11 @@ export default async function TeamSeasonGPPage({
   return (
     <MaxWidthWrapper>
       <section className='mt-8 grid'>
-        <DriversHeader team={team} />
+        <DriversHeader
+          team={team}
+          season={seasonSlug}
+          raceName={result.raceName}
+        />
         <SeasonRacesNav
           seasonRaces={seasonRaces}
           teamSlug={teamSlug}

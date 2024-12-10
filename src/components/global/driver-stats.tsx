@@ -71,6 +71,14 @@ export const DriverStats = ({
           ? `${result.driverOnePoleToWinRatio.toFixed(1)}%`
           : `${result.driverTwoPoleToWinRatio.toFixed(1)}%`,
       type: 'poleToWinRatio'
+    },
+    {
+      title: 'Points per Race',
+      value:
+        driverNumber === 1
+          ? `${result.driverOnePointsPerRace}`
+          : `${result.driverTwoPointsPerRace}`,
+      type: 'pointsPerRace'
     }
   ]
 
