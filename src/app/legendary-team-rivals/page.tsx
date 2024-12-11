@@ -26,12 +26,12 @@ export default async function HistoricalTeamRivalriesPage() {
                 background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
               }}
               className={cn(
-                'mt-4 grid grid-cols-2 gap-5 rounded-lg px-4 pb-10 pt-5 md:px-6'
+                'mt-4 grid grid-cols-2 gap-5 rounded-xl px-4 pb-10 pt-5 md:px-6'
               )}
             >
               {team.drivers.map(driver => (
                 <div key={driver.id} className='relative'>
-                  <div className={cn('relative overflow-hidden rounded-lg')}>
+                  <div className={cn('relative overflow-hidden rounded-xl')}>
                     <Image
                       alt={`${driver.firstName} ${driver.lastName}`}
                       src={driver.pictureUrl ?? ''}
@@ -42,7 +42,7 @@ export default async function HistoricalTeamRivalriesPage() {
                       )}
                     />
                   </div>
-                  <div className='absolute inset-0 transform rounded-lg bg-black opacity-10 duration-300 group-hover:opacity-0' />
+                  <div className='absolute inset-0 transform rounded-xl bg-black opacity-10 duration-300 group-hover:opacity-0' />
                 </div>
               ))}
             </div>

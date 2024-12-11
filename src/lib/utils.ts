@@ -326,3 +326,28 @@ export const getComparison = (
   if (!stat) return false
   return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
 }
+
+export const isLightColor = (color: string) => {
+  // Convert hex to RGB
+  const hex = color.replace('#', '')
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+
+  // Calculate brightness
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness > 128
+}
+
+export const formatPosition = (position: number): string => {
+  const suffixes = ['th', 'st', 'nd', 'rd']
+  const remainder = position % 100
+
+  // Handle 11, 12, 13 specially
+  if (remainder > 10 && remainder < 14) {
+    return `${position}th`
+  }
+
+  const suffix = suffixes[remainder % 10] || suffixes[0]
+  return `${position}${suffix}`
+}

@@ -39,7 +39,7 @@ export default async function TeamRivalryPage({
           width={560}
           height={560}
           className={cn(
-            'w-24 transform rounded-lg duration-300 group-hover:-scale-y-105 group-hover:scale-x-105 md:w-72'
+            'w-24 transform rounded-xl duration-300 group-hover:-scale-y-105 group-hover:scale-x-105 md:w-72'
           )}
         />
 
@@ -54,7 +54,7 @@ export default async function TeamRivalryPage({
           width={560}
           height={560}
           className={cn(
-            'w-24 rounded-lg duration-300 group-hover:-scale-y-105 group-hover:scale-x-105 md:w-72'
+            'w-24 rounded-xl duration-300 group-hover:-scale-y-105 group-hover:scale-x-105 md:w-72'
           )}
         />
       </section>

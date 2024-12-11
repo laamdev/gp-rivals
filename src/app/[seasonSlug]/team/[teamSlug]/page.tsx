@@ -4,15 +4,19 @@ import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { DriverStats } from '@/components/global/driver-stats'
 import { HeadToHeadRadial } from '@/components/charts/head-to-head-radial'
 import { OverallPerformanceRadar } from '@/components/charts/overall-performance-radar'
+import { StatusPieChart } from '@/components/charts/status-pie-chart'
+import { PlacesGainBar } from '@/components/charts/places-gained-bar'
+import { SectionHeading } from '@/components/global/section-heading'
+import { StatCard } from '@/components/global/stat-card'
 
 import {
+  getConstructorStandings,
   getDriversSeasonStats,
   getSeasonChampion,
   getSeasonRaces
 } from '@/lib/fetchers'
+import { formatPosition } from '@/lib/utils'
 import { seasons } from '@/data/seasons'
-import { StatusPieChart } from '@/components/charts/status-pie-chart'
-import { PlacesGainBar } from '@/components/charts/places-gained-bar'
 interface TeamSeasonPageProps {
   params: Promise<{
     seasonSlug: string
@@ -65,9 +69,18 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
     return <div>No data available</div>
   }
 
+  const teamOverallStats = await getConstructorStandings({
+    season: seasonSlug,
+    constructorId: teamSlug
+  })
+
+  if (!teamOverallStats) {
+    return null
+  }
+
   return (
     <MaxWidthWrapper>
-      <section className='mt-8 grid'>
+      <section className='mt-6 grid sm:mt-8'>
         <DriversHeader team={team} season={seasonSlug} />
         <SeasonRacesNav
           seasonRaces={seasonRaces}
@@ -76,11 +89,35 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
         />
       </section>
 
-      <div className='mt-16 flex flex-col gap-y-16'>
+      <div className='mt-10 flex flex-col gap-y-10 sm:mt-16 sm:gap-y-16'>
         <div>
-          <h2 className='text-center text-lg font-bold'>{`${seasonSlug} Season Stats`}</h2>
+          <SectionHeading>{`${seasonSlug} ${team.name} Season Stats`}</SectionHeading>
 
-          <div className='mt-8'>
+          <div className='mt-6 grid grid-cols-3 sm:mt-8'>
+            <StatCard
+              title='Position'
+              value={formatPosition(teamOverallStats.position)}
+              comparison={false}
+              className='rounded-bl-xl rounded-tl-xl'
+            />
+            <StatCard
+              title='Points'
+              value={teamOverallStats.points}
+              comparison={false}
+            />
+            <StatCard
+              title='Wins'
+              value={teamOverallStats.wins}
+              comparison={false}
+              className='rounded-br-xl rounded-tr-xl'
+            />
+          </div>
+        </div>
+
+        <div>
+          <SectionHeading>{`${seasonSlug} Drivers Season Stats`}</SectionHeading>
+
+          <div className='mt-6 sm:mt-8'>
             <OverallPerformanceRadar
               bestDriverPoints={champion.points}
               driverOnePoints={result.driverOnePoints}
@@ -97,16 +134,26 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               driverTwoLapsCompleted={result.driverTwoLapsCompleted}
             />
           </div>
-          <div className='mt-8 grid grid-cols-2 gap-x-8'>
-            <DriverStats driverNumber={1} result={result} />
-            <DriverStats driverNumber={2} result={result} />
+          <div className='mt-6 grid grid-cols-2 gap-x-6 sm:mt-8 sm:gap-x-8'>
+            <DriverStats
+              driverNumber={1}
+              result={result}
+              color={team.primaryColor}
+              driver={team.drivers[0].code}
+            />
+            <DriverStats
+              driverNumber={2}
+              result={result}
+              color={team.secondaryColor}
+              driver={team.drivers[1].code}
+            />
           </div>
         </div>
 
         <div>
-          <h2 className='text-center text-lg font-bold'>{`${seasonSlug} Head-to-Heads`}</h2>
+          <SectionHeading>{`${seasonSlug} Head-to-Heads`}</SectionHeading>
 
-          <div className='mt-8 grid gap-8 sm:grid-cols-2'>
+          <div className='mt-6 grid gap-6 sm:mt-8 sm:grid-cols-2 sm:gap-8'>
             <HeadToHeadRadial
               competition='race'
               year={seasonSlug}
@@ -132,28 +179,29 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               driverTwoValue={result.driverTwoBetterQualifying}
             />
           </div>
+        </div>
+        <div>
+          <SectionHeading>{`${seasonSlug} Other Stats`}</SectionHeading>
 
-          <div className='mt-8 grid grid-cols-2 gap-8'>
+          <div className='mt-6 grid grid-cols-2 gap-6 sm:mt-8 sm:gap-8'>
             <StatusPieChart status={result.driverOneStatus} />
             <StatusPieChart status={result.driverTwoStatus} />
-            {/* <DriverStatusRadial statusDetails={result.driverOneStatus} />
-            <DriverStatusRadial statusDetails={result.driverTwoStatus} /> */}
           </div>
-        </div>
 
-        <div className='grid gap-8'>
-          <PlacesGainBar
-            positionChanges={result.driverOnePositionChanges}
-            totalPositionsGained={result.driverOneTotalPositionsGained}
-            driver={team.drivers[0].lastName}
-            season={seasonSlug}
-          />
-          <PlacesGainBar
-            positionChanges={result.driverTwoPositionChanges}
-            totalPositionsGained={result.driverTwoTotalPositionsGained}
-            driver={team.drivers[1].lastName}
-            season={seasonSlug}
-          />
+          <div className='mt-6 grid gap-6 sm:mt-8 sm:gap-8'>
+            <PlacesGainBar
+              positionChanges={result.driverOnePositionChanges}
+              totalPositionsGained={result.driverOneTotalPositionsGained}
+              driver={team.drivers[0].lastName}
+              season={seasonSlug}
+            />
+            <PlacesGainBar
+              positionChanges={result.driverTwoPositionChanges}
+              totalPositionsGained={result.driverTwoTotalPositionsGained}
+              driver={team.drivers[1].lastName}
+              season={seasonSlug}
+            />
+          </div>
         </div>
       </div>
     </MaxWidthWrapper>

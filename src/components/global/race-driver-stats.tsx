@@ -1,4 +1,4 @@
-import { getComparison } from '@/lib/utils'
+import { formatPosition, getComparison } from '@/lib/utils'
 
 import { StatCard } from '@/components/global/stat-card'
 
@@ -30,12 +30,12 @@ export const RaceDriverStats = ({
   const stats = [
     {
       title: 'Position',
-      value: driverData.position,
+      value: formatPosition(Number(driverData.position)),
       type: 'position'
     },
     {
       title: 'Grid',
-      value: driverData.grid,
+      value: formatPosition(Number(driverData.grid)),
       type: 'grid'
     },
     {

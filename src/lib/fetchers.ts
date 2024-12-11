@@ -1,19 +1,4 @@
-// ERGAST API FETCHERS
-
-export const getSeasonRaces = async ({ seasonSlug }) => {
-  const seasonRacesResult = await fetch(
-    `http://ergast.com/api/f1/${seasonSlug}.json`
-  )
-
-  if (!seasonRacesResult.ok) return undefined
-
-  const { MRData: seasonRacesData } = await seasonRacesResult.json()
-
-  return {
-    seasonRaces: seasonRacesData.RaceTable.Races,
-    totalSeasonRaces: seasonRacesData.total
-  }
-}
+// TYPES
 
 interface DriverStats {
   qualifying: string
@@ -37,7 +22,37 @@ interface DriverStats {
   pointsPerRace: number
 }
 
+interface ConstructorStanding {
+  position: string
+  positionText: string
+  points: string
+  wins: string
+  Constructor: {
+    constructorId: string
+    url: string
+    name: string
+    nationality: string
+  }
+}
+
+// CONSTANTS
+
 const BASE_URL = 'http://ergast.com/api/f1'
+
+// FUNCTIONS
+
+export const getSeasonRaces = async ({ seasonSlug }) => {
+  const seasonRacesResult = await fetch(`${BASE_URL}/${seasonSlug}.json`)
+
+  if (!seasonRacesResult.ok) return undefined
+
+  const { MRData: seasonRacesData } = await seasonRacesResult.json()
+
+  return {
+    seasonRaces: seasonRacesData.RaceTable.Races,
+    totalSeasonRaces: seasonRacesData.total
+  }
+}
 
 const fetchErgastData = async (endpoint: string) => {
   const response = await fetch(`${BASE_URL}${endpoint}`)
@@ -241,7 +256,7 @@ const getDriverRaceResult = async (
 ) => {
   try {
     const response = await fetch(
-      `http://ergast.com/api/f1/${season}/circuits/${circuit}/drivers/${driver}/results.json`
+      `${BASE_URL}/${season}/circuits/${circuit}/drivers/${driver}/results.json`
     )
     const data = await response.json()
     const race = data.MRData.RaceTable.Races[0]
@@ -310,5 +325,34 @@ export const getSeasonChampion = async (season: string) => {
     points: Number(champion.points),
     wins: Number(champion.wins),
     position: Number(champion.position)
+  }
+}
+
+export const getConstructorStandings = async ({
+  season,
+  constructorId
+}: {
+  season: string
+  constructorId: string
+}) => {
+  const response = await fetch(
+    `${BASE_URL}/${season}/constructors/${constructorId}/constructorStandings.json`
+  )
+
+  if (!response.ok) return undefined
+
+  const { MRData } = await response.json()
+
+  const standings =
+    MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings[0]
+
+  if (!standings) return undefined
+
+  return {
+    position: Number(standings.position),
+    points: Number(standings.points),
+    wins: Number(standings.wins),
+    constructorName: standings.Constructor.name,
+    nationality: standings.Constructor.nationality
   }
 }

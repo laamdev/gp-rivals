@@ -1,35 +1,47 @@
+import { cn } from '@/lib/utils'
 import { Handshake, Trophy } from '@phosphor-icons/react/dist/ssr'
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const StatCard = ({
   title,
   value,
-  comparison
+  comparison,
+  isLast,
+  isSecondToLast,
+  className
 }: {
   title: string
   value: string | number
   comparison: boolean | 'tie'
+  isLast?: boolean
+  isSecondToLast?: boolean
+  className?: string
 }) => (
-  <Card className='relative flex flex-col text-center'>
+  <div
+    className={cn(
+      'relative flex flex-col border bg-card p-2 text-center text-card-foreground shadow-sm sm:p-4',
+      {
+        'rounded-br-xl': isLast,
+        'rounded-bl-xl': isSecondToLast
+      },
+      className
+    )}
+  >
     {comparison === 'tie' ? (
       <Handshake
         weight='fill'
-        className='absolute -right-2 -top-2 h-5 w-5 text-blue-500'
+        className='absolute -right-2 -top-2 z-50 size-4 text-blue-500'
       />
     ) : comparison ? (
       <Trophy
         weight='fill'
-        className='absolute -right-2 -top-2 h-5 w-5 text-yellow-500'
+        className='absolute -right-2 -top-2 z-50 size-4 text-yellow-500'
       />
     ) : null}
-    <CardHeader>
-      <CardTitle className='text-xs font-medium text-zinc-400 sm:text-sm'>
-        {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent className='font-serif text-sm font-bold sm:text-2xl'>
-      {value}
-    </CardContent>
-  </Card>
+    <div className='flex flex-col'>
+      <h2 className='text-xs text-zinc-400 sm:text-sm'>{title}</h2>
+      <h3 className='mt-2 font-serif text-sm tracking-tighter sm:text-lg'>
+        {value}
+      </h3>
+    </div>
+  </div>
 )

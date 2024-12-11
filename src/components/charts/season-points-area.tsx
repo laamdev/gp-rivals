@@ -82,19 +82,19 @@ export const SeasonPointsArea = () => {
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className='w-[160px] rounded-lg sm:ml-auto'
+            className='w-[160px] rounded-xl sm:ml-auto'
             aria-label='Select a value'
           >
             <SelectValue placeholder='Last 3 months' />
           </SelectTrigger>
           <SelectContent className='rounded-xl'>
-            <SelectItem value='90d' className='rounded-lg'>
+            <SelectItem value='90d' className='rounded-xl'>
               Last 3 months
             </SelectItem>
-            <SelectItem value='30d' className='rounded-lg'>
+            <SelectItem value='30d' className='rounded-xl'>
               Last 30 days
             </SelectItem>
-            <SelectItem value='7d' className='rounded-lg'>
+            <SelectItem value='7d' className='rounded-xl'>
               Last 7 days
             </SelectItem>
           </SelectContent>

@@ -1,21 +1,27 @@
-import { getComparison } from '@/lib/utils'
+import { cn, formatPosition, getComparison, isLightColor } from '@/lib/utils'
 
 import { StatCard } from '@/components/global/stat-card'
 
-export const DriverStats = ({
-  driverNumber,
-  result
-}: {
+interface DriverStatsProps {
   driverNumber: 1 | 2
   result: any
-}) => {
+  color: string
+  driver: string
+}
+
+export const DriverStats = ({
+  driverNumber,
+  result,
+  color,
+  driver
+}: DriverStatsProps) => {
   const stats = [
     {
       title: 'Position',
       value:
         driverNumber === 1
-          ? result.driverOnePosition
-          : result.driverTwoPosition,
+          ? formatPosition(Number(result.driverOnePosition))
+          : formatPosition(Number(result.driverTwoPosition)),
       type: 'position'
     },
     {
@@ -83,15 +89,28 @@ export const DriverStats = ({
   ]
 
   return (
-    <div className='grid gap-4 sm:grid-cols-2'>
-      {stats.map((stat, idx) => (
-        <StatCard
-          key={idx}
-          title={stat.title}
-          value={stat.value}
-          comparison={getComparison(stat.type, driverNumber, result)}
-        />
-      ))}
+    <div>
+      <div
+        className={cn(
+          'rounded-t-xl p-4 text-center font-serif text-base sm:p-6 sm:text-lg',
+          isLightColor(color) ? 'text-zinc-900' : 'text-white'
+        )}
+        style={{ background: color }}
+      >
+        {driver}
+      </div>
+      <div className='grid sm:grid-cols-2'>
+        {stats.map((stat, idx) => (
+          <StatCard
+            key={idx}
+            title={stat.title}
+            value={stat.value}
+            comparison={getComparison(stat.type, driverNumber, result)}
+            isLast={idx === stats.length - 1}
+            isSecondToLast={idx === stats.length - 2}
+          />
+        ))}
+      </div>
     </div>
   )
 }
