@@ -6,6 +6,7 @@ import { seasons } from '@/data/seasons'
 import { getDriversRaceStats, getSeasonRaces } from '@/lib/fetchers'
 import { RaceDriverStats } from '@/components/global/race-driver-stats'
 import { PrivateResultType } from '@prisma/client/runtime/library'
+import { DriverStats } from '@/components/global/driver-stats'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{
@@ -76,8 +77,20 @@ export default async function TeamSeasonGPPage({
         <div>
           <h2 className='text-center text-lg font-bold'>{`${seasonSlug} ${result.raceName} Stats`}</h2>
           <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
-            <RaceDriverStats driverNumber={1} result={result} />
-            <RaceDriverStats driverNumber={2} result={result} />
+            <DriverStats
+              driverNumber={1}
+              result={result}
+              color={team.primaryColor}
+              driver={team.drivers[0].code}
+              mode='race'
+            />
+            <DriverStats
+              driverNumber={2}
+              result={result}
+              color={team.secondaryColor}
+              driver={team.drivers[1].code}
+              mode='race'
+            />
           </div>
         </div>
       </div>

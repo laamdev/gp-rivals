@@ -62,7 +62,7 @@ export const seasons = [
       },
       {
         id: 3,
-        slug: 'red-bull-racing',
+        slug: 'red_bull',
         name: 'Red Bull Racing',
         primaryColor: '#223971',
         secondaryColor: '#CC1E4A',
@@ -121,7 +121,7 @@ export const seasons = [
       },
       {
         id: 5,
-        slug: 'aston-martin',
+        slug: 'aston_martin',
         name: 'Aston Martin',
         primaryColor: '#00665E',
         secondaryColor: '#CEDC00',
@@ -179,7 +179,7 @@ export const seasons = [
       },
       {
         id: 7,
-        slug: 'hass',
+        slug: 'haas',
         name: 'Hass',
         primaryColor: '#DA291C',
         secondaryColor: '#AEAEAE',
@@ -267,7 +267,7 @@ export const seasons = [
       },
       {
         id: 10,
-        slug: 'kick-sauber',
+        slug: 'sauber',
         name: 'kick Sauber',
         primaryColor: '#00e701',
         secondaryColor: '#4D5559',

@@ -140,12 +140,14 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               result={result}
               color={team.primaryColor}
               driver={team.drivers[0].code}
+              mode='season'
             />
             <DriverStats
               driverNumber={2}
               result={result}
               color={team.secondaryColor}
               driver={team.drivers[1].code}
+              mode='season'
             />
           </div>
         </div>

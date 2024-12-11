@@ -7,15 +7,17 @@ interface DriverStatsProps {
   result: any
   color: string
   driver: string
+  mode?: 'season' | 'race'
 }
 
 export const DriverStats = ({
   driverNumber,
   result,
   color,
-  driver
+  driver,
+  mode = 'season'
 }: DriverStatsProps) => {
-  const stats = [
+  const seasonStats = [
     {
       title: 'Position',
       value:
@@ -87,6 +89,57 @@ export const DriverStats = ({
       type: 'pointsPerRace'
     }
   ]
+
+  const raceStats = [
+    {
+      title: 'Finish Position',
+      value:
+        driverNumber === 1
+          ? formatPosition(Number(result.driverOne?.position))
+          : formatPosition(Number(result.driverTwo?.position)),
+      type: 'position'
+    },
+    {
+      title: 'Grid Position',
+      value:
+        driverNumber === 1
+          ? formatPosition(Number(result.driverOne?.grid))
+          : formatPosition(Number(result.driverTwo?.grid)),
+      type: 'grid'
+    },
+    {
+      title: 'Points',
+      value:
+        driverNumber === 1
+          ? result.driverOne?.points
+          : result.driverTwo?.points,
+      type: 'points'
+    },
+    {
+      title: 'Laps',
+      value:
+        driverNumber === 1 ? result.driverOne?.laps : result.driverTwo?.laps,
+      type: 'laps'
+    },
+    {
+      title: 'Fastest Lap',
+      value:
+        driverNumber === 1
+          ? result.driverOne?.fastestLap || '-'
+          : result.driverTwo?.fastestLap || '-',
+      type: 'fastestLap'
+    },
+    {
+      title: 'Status',
+      value:
+        driverNumber === 1
+          ? result.driverOne?.status
+          : result.driverTwo?.status,
+      type: 'status'
+    }
+  ]
+
+  const stats = mode === 'season' ? seasonStats : raceStats
 
   return (
     <div>

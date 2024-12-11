@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Handshake, Trophy } from '@phosphor-icons/react/dist/ssr'
+import { Equals, Star } from '@phosphor-icons/react/dist/ssr'
 
 export const StatCard = ({
   title,
@@ -27,14 +27,14 @@ export const StatCard = ({
     )}
   >
     {comparison === 'tie' ? (
-      <Handshake
-        weight='fill'
-        className='absolute -right-2 -top-2 z-50 size-4 text-blue-500'
+      <Equals
+        weight='bold'
+        className='absolute right-2 top-2 z-50 size-3 text-blue-500'
       />
     ) : comparison ? (
-      <Trophy
+      <Star
         weight='fill'
-        className='absolute -right-2 -top-2 z-50 size-4 text-yellow-500'
+        className='absolute right-2 top-2 z-50 size-3 text-yellow-500'
       />
     ) : null}
     <div className='flex flex-col'>
