@@ -22,7 +22,7 @@ export const AnswerOption = ({
   onClick
 }: AnswerOptionProps) => {
   return (
-    <Button variant={variant} size='xl' onClick={onClick}>
+    <Button onClick={onClick}>
       <p className='whitespace-normal'>{answer}</p>
     </Button>
   )

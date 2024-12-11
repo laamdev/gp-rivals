@@ -106,7 +106,7 @@ export default function QuizzPage() {
         </div>
       )}
 
-      <Button variant='neo' size='lg' onClick={handleNext}>
+      <Button size='lg' onClick={handleNext}>
         {!isStarted
           ? 'Start'
           : currentQuestion === quizz.length - 1
