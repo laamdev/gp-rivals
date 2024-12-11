@@ -76,8 +76,8 @@ export const DriverStats = ({
       title: 'Pole to Win Ratio',
       value:
         driverNumber === 1
-          ? `${result.driverOnePoleToWinRatio.toFixed(1)}%`
-          : `${result.driverTwoPoleToWinRatio.toFixed(1)}%`,
+          ? `${result.driverOnePoleToWinRatio?.toFixed(1)}%`
+          : `${result.driverTwoPoleToWinRatio?.toFixed(1)}%`,
       type: 'poleToWinRatio'
     },
     {

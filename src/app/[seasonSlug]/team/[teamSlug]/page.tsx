@@ -27,6 +27,16 @@ interface TeamSeasonPageProps {
 export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   const { seasonSlug, teamSlug } = await params
 
+  const teamOverallStats = await getConstructorStandings({
+    season: seasonSlug,
+    constructorId: teamSlug
+  })
+
+  if (!teamOverallStats) {
+    console.log(JSON.stringify('bang 1!'))
+    return null
+  }
+
   const team = await (async () => {
     const season = seasons.find(season => season.year === Number(seasonSlug))
     if (!season) {
@@ -42,12 +52,14 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   })()
 
   if (!team) {
-    return <div></div>
+    console.log(JSON.stringify('bang 2!'))
+    return null
   }
 
   const racesResult = await getSeasonRaces({ seasonSlug })
 
   if (!racesResult) {
+    console.log(JSON.stringify('bang 3!'))
     return null
   }
 
@@ -56,6 +68,7 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   const champion = await getSeasonChampion(seasonSlug)
 
   if (!champion) {
+    console.log(JSON.stringify('bang 4!'))
     return null
   }
 
@@ -69,14 +82,7 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
     return <div>No data available</div>
   }
 
-  const teamOverallStats = await getConstructorStandings({
-    season: seasonSlug,
-    constructorId: teamSlug
-  })
-
-  if (!teamOverallStats) {
-    return null
-  }
+  console.log(JSON.stringify(result, null, 2), 'XXX')
 
   return (
     <MaxWidthWrapper>

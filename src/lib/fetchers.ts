@@ -41,7 +41,8 @@ interface DriverStats {
 
 // CONSTANTS
 
-const BASE_URL = 'https://api.jolpi.ca/ergast/f1'
+// // const BASE_URL = 'https://api.jolpi.ca/ergast/f1'
+const BASE_URL = 'http://ergast.com/api/f1'
 
 // FUNCTIONS
 
@@ -94,11 +95,8 @@ const comparePositions = (
 }
 
 export const getSeasonRaces = async ({ seasonSlug }) => {
-  const seasonRacesResult = await fetch(`${BASE_URL}/${seasonSlug}.json`)
-
-  if (!seasonRacesResult.ok) return undefined
-
-  const { MRData: seasonRacesData } = await seasonRacesResult.json()
+  const seasonRacesData = await fetchErgastData(`/${seasonSlug}.json`)
+  if (!seasonRacesData) return undefined
 
   return {
     seasonRaces: seasonRacesData.RaceTable.Races,
@@ -259,11 +257,12 @@ const getDriverRaceResult = async (
   driver: string
 ) => {
   try {
-    const response = await fetch(
-      `${BASE_URL}/${season}/circuits/${circuit}/drivers/${driver}/results.json`
+    const data = await fetchErgastData(
+      `/${season}/circuits/${circuit}/drivers/${driver}/results.json`
     )
-    const data = await response.json()
-    const race = data.MRData.RaceTable.Races[0]
+    if (!data) return undefined
+
+    const race = data.RaceTable.Races[0]
     return {
       raceName: race?.raceName,
       result: race?.Results[0]
@@ -339,17 +338,13 @@ export const getConstructorStandings = async ({
   season: string
   constructorId: string
 }) => {
-  const response = await fetch(
-    `${BASE_URL}/${season}/constructors/${constructorId}/constructorStandings.json`
+  const data = await fetchErgastData(
+    `/${season}/constructors/${constructorId}/constructorStandings.json`
   )
-
-  if (!response.ok) return undefined
-
-  const { MRData } = await response.json()
+  if (!data) return undefined
 
   const standings =
-    MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings[0]
-
+    data.StandingsTable.StandingsLists[0]?.ConstructorStandings[0]
   if (!standings) return undefined
 
   return {
@@ -366,7 +361,6 @@ export const getConstructorStandings = async ({
 export const getLegendaryRivalryOverallResults = async (
   rivalry: LegendaryRivalry
 ) => {
-  // Get results for each season
   const seasonsResults = await Promise.all(
     rivalry.seasons.map(async season => {
       const results = await getDriversSeasonStats({
@@ -377,27 +371,28 @@ export const getLegendaryRivalryOverallResults = async (
       return results
     })
   )
-  console.log(JSON.stringify(seasonsResults, null, 2), 'xxx')
 
-  // Initialize combined stats
   const combinedStats = {
     driverOne: {
       points: 0,
       wins: 0,
       poles: 0,
       podiums: 0,
-      fastestLaps: 0
+      fastestLaps: 0,
+      positions: [] as number[],
+      championships: 0 // Add championships counter
     },
     driverTwo: {
       points: 0,
       wins: 0,
       poles: 0,
       podiums: 0,
-      fastestLaps: 0
+      fastestLaps: 0,
+      positions: [] as number[],
+      championships: 0 // Add championships counter
     }
   }
 
-  // Sum up stats across seasons
   seasonsResults.forEach(season => {
     if (!season) return
 
@@ -407,6 +402,11 @@ export const getLegendaryRivalryOverallResults = async (
     combinedStats.driverOne.poles += Number(season.driverOnePoles)
     combinedStats.driverOne.podiums += Number(season.driverOnePodiums)
     combinedStats.driverOne.fastestLaps += Number(season.driverOneFastestLaps)
+    combinedStats.driverOne.positions.push(Number(season.driverOnePosition))
+    // Check if champion
+    if (Number(season.driverOnePosition) === 1) {
+      combinedStats.driverOne.championships++
+    }
 
     // Driver Two
     combinedStats.driverTwo.points += Number(season.driverTwoPoints)
@@ -414,15 +414,37 @@ export const getLegendaryRivalryOverallResults = async (
     combinedStats.driverTwo.poles += Number(season.driverTwoPoles)
     combinedStats.driverTwo.podiums += Number(season.driverTwoPodiums)
     combinedStats.driverTwo.fastestLaps += Number(season.driverTwoFastestLaps)
+    combinedStats.driverTwo.positions.push(Number(season.driverTwoPosition))
+    // Check if champion
+    if (Number(season.driverTwoPosition) === 1) {
+      combinedStats.driverTwo.championships++
+    }
   })
+  // Calculate averages
+  const driverOneAvgPosition =
+    combinedStats.driverOne.positions.length > 0
+      ? (
+          combinedStats.driverOne.positions.reduce((a, b) => a + b, 0) /
+          combinedStats.driverOne.positions.length
+        ).toFixed(1)
+      : 0
+
+  const driverTwoAvgPosition =
+    combinedStats.driverTwo.positions.length > 0
+      ? (
+          combinedStats.driverTwo.positions.reduce((a, b) => a + b, 0) /
+          combinedStats.driverTwo.positions.length
+        ).toFixed(1)
+      : 0
 
   return {
-    ...combinedStats,
-    totalSeasons: rivalry.seasons.length,
-    teamName: rivalry.team,
-    primaryColor: rivalry.primaryColor,
-    secondaryColor: rivalry.secondaryColor,
-    driverOne: rivalry.drivers[0],
-    driverTwo: rivalry.drivers[1]
+    driverOne: {
+      ...combinedStats.driverOne,
+      averagePosition: Number(driverOneAvgPosition)
+    },
+    driverTwo: {
+      ...combinedStats.driverTwo,
+      averagePosition: Number(driverTwoAvgPosition)
+    }
   }
 }

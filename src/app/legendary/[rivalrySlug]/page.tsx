@@ -1,19 +1,20 @@
+import Image from 'next/image'
+
 import { DriversHeader } from '@/components/global/drivers-header'
 import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { RaceDriverStats } from '@/components/global/race-driver-stats'
 import { PrivateResultType } from '@prisma/client/runtime/library'
-import { DriverStats } from '@/components/global/driver-stats'
+import { DriverStats } from '@/components/legendary/driver-stats'
+import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
 
+import { cn } from '@/lib/utils'
 import {
   getDriversRaceStats,
   getLegendaryRivalryOverallResults,
   getSeasonRaces
 } from '@/lib/fetchers'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
-import Image from 'next/image'
-import { cn } from '@/lib/utils'
-import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{
@@ -32,7 +33,7 @@ export default async function LegendaryRivalryPage({
     return null
   }
 
-  const data = await getLegendaryRivalryOverallResults(rivalry)
+  const result = await getLegendaryRivalryOverallResults(rivalry)
 
   return (
     <MaxWidthWrapper>
@@ -65,27 +66,25 @@ export default async function LegendaryRivalryPage({
 
       <SeasonsNav seasons={rivalry.seasons} rivalry={rivalry.slug} />
 
-      {/* <div className='mt-16 flex flex-col gap-y-16'>
+      <div className='mt-16 flex flex-col gap-y-16'>
         <div>
-          <h2 className='text-center text-lg font-bold'>{`${seasonSlug} ${result.raceName} Stats`}</h2>
+          <h2 className='text-center text-lg font-bold'>{`Overall Rivalry Stats`}</h2>
           <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
             <DriverStats
               driverNumber={1}
               result={result}
-              color={team.primaryColor}
-              driver={team.drivers[0].code}
-              mode='race'
+              color={rivalry.primaryColor}
+              driver={rivalry.drivers[0].code}
             />
             <DriverStats
               driverNumber={2}
               result={result}
-              color={team.secondaryColor}
-              driver={team.drivers[1].code}
-              mode='race'
+              color={rivalry.secondaryColor}
+              driver={rivalry.drivers[1].code}
             />
           </div>
         </div>
-      </div> */}
+      </div>
     </MaxWidthWrapper>
   )
 }
