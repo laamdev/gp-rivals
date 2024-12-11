@@ -1,14 +1,14 @@
+import '@/app/globals.css'
+
 import type { Metadata } from 'next'
 import { ReactNode } from 'react'
 import localFont from 'next/font/local'
 import { Space_Grotesk } from 'next/font/google'
 
 import { Header } from '@/components/navigation/header'
-
-import '@/app/globals.css'
+import { Menu } from '@/components/navigation/slide-menu'
 
 import { cn } from '@/lib/utils'
-import { SlideMenu } from '@/components/navigation/slide-menu'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -64,7 +64,7 @@ export default async function RootLayout({
           'mb-10 bg-zinc-950 font-sans text-zinc-50'
         )}
       >
-        <SlideMenu />
+        <Menu />
         <main>{children}</main>
       </body>
     </html>

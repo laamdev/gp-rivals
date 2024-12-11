@@ -12,7 +12,7 @@ interface DriversHeaderProps {
       lastName: string
     }[]
   }
-  season: string
+  season?: string
   raceName?: string
 }
 

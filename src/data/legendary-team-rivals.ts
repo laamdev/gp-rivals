@@ -17,6 +17,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'senna',
         firstName: 'Ayrton',
         lastName: 'Senna',
         code: 'SEN',
@@ -25,6 +26,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'prost',
         firstName: 'Alain',
         lastName: 'Prost',
         code: 'PRO',
@@ -51,6 +53,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'mansell',
         firstName: 'Nigel',
         lastName: 'Mansell',
         code: 'MAN',
@@ -59,6 +62,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'piquet',
         firstName: 'Nelson',
         lastName: 'Piquet',
         code: 'PIQ',
@@ -93,6 +97,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'vettel',
         firstName: 'Sebastian',
         lastName: 'Vettel',
         code: 'VET',
@@ -101,6 +106,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'webber',
         firstName: 'Mark',
         lastName: 'Webber',
         code: 'WEB',
@@ -126,6 +132,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'villeneuve',
         firstName: 'Gilles',
         lastName: 'Villeneuve',
         code: 'VIL',
@@ -134,6 +141,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'pironi',
         firstName: 'Didier',
         lastName: 'Pironi',
         code: 'PIR',
@@ -159,6 +167,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'jones',
         firstName: 'Alan',
         lastName: 'Jones',
         code: 'JON',
@@ -167,6 +176,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'reutemann',
         firstName: 'Carlos',
         lastName: 'Reutemann',
         code: 'REU',
@@ -198,6 +208,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'hamilton',
         firstName: 'Lewis',
         lastName: 'Hamilton',
         code: 'HAM',
@@ -206,6 +217,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'rosberg',
         firstName: 'Nico',
         lastName: 'Rosberg',
         code: 'ROS',
@@ -228,6 +240,7 @@ export const legendaryTeamRivals = [
     drivers: [
       {
         id: 1,
+        slug: 'hamilton',
         firstName: 'Lewis',
         lastName: 'Hamilton',
         code: 'HAM',
@@ -236,6 +249,7 @@ export const legendaryTeamRivals = [
       },
       {
         id: 2,
+        slug: 'alonso',
         firstName: 'Fernando',
         lastName: 'Alonso',
         code: 'ALO',

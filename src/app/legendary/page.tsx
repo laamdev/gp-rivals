@@ -7,31 +7,22 @@ import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { cn } from '@/lib/utils'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
 
-export default async function HistoricalTeamRivalriesPage() {
+export default async function LegendaryRivalriesPage() {
   return (
     <MaxWidthWrapper>
       <MainHeader
         heading='Legendary Team Rivals'
         summary='Explore how these legendary drivers matched up when they shared the same car, and relive the moments that defined their epic battles on the track.'
       />
-      <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'>
         {legendaryTeamRivals.map((team, idx) => (
-          <Link
-            key={idx}
-            href={`/legendary-team-rivals/${team.slug}`}
-            className='group'
-          >
+          <Link key={idx} href={`/legendary/${team.slug}`} className='group'>
             <div
-              style={{
-                background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
-              }}
-              className={cn(
-                'mt-4 grid grid-cols-2 gap-5 rounded-xl px-4 pb-10 pt-5 md:px-6'
-              )}
+              className={cn('mt-6 grid grid-cols-2 gap-x-4 rounded-xl sm:mt-8')}
             >
-              {team.drivers.map(driver => (
+              {team.drivers.map((driver, idx) => (
                 <div key={driver.id} className='relative'>
-                  <div className={cn('relative overflow-hidden rounded-xl')}>
+                  <div className={cn('relative overflow-hidden rounded-t-xl')}>
                     <Image
                       alt={`${driver.firstName} ${driver.lastName}`}
                       src={driver.pictureUrl ?? ''}
@@ -46,7 +37,12 @@ export default async function HistoricalTeamRivalriesPage() {
                 </div>
               ))}
             </div>
-            <h2 className='-mt-5 text-center font-mono text-lg'>
+            <h2
+              className='rounded-b-xl bg-card p-4 text-center font-mono text-lg'
+              // style={{
+              //   background: `linear-gradient(to right, ${team.primaryColor}, ${team.secondaryColor})`
+              // }}
+            >
               {`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}
             </h2>
           </Link>

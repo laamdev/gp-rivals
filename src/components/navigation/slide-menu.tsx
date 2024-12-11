@@ -1,71 +1,40 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'motion/react'
+import { usePathname } from 'next/navigation'
 
-export const SlideMenu = () => {
-  const [position, setPosition] = useState({
-    left: 0,
-    width: 0,
-    opacity: 0
-  })
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-  return (
-    <ul
-      onMouseLeave={() => {
-        setPosition(pv => ({
-          ...pv,
-          opacity: 0
-        }))
-      }}
-      className='relative mx-auto my-10 flex w-fit rounded-full border-2 border-black bg-white p-1'
-    >
-      <Tab setPosition={setPosition}>
-        <Link href={`/`}>{`2024`}</Link>
-      </Tab>
-      <Tab setPosition={setPosition}>
-        <Link href='/legendary-team-rivals'>{`Legendary`}</Link>
-      </Tab>
-
-      <Cursor position={position} />
-    </ul>
-  )
-}
-
-const Tab = ({ children, setPosition }) => {
-  const ref = useRef(null)
+export const Menu = () => {
+  const pathname = usePathname()
 
   return (
-    <li
-      ref={ref}
-      onMouseEnter={() => {
-        if (!ref?.current) return
-
-        // @ts-expect-error
-        const { width } = ref.current.getBoundingClientRect()
-
-        setPosition({
-          // @ts-expect-error
-          left: ref.current.offsetLeft,
-          width,
-          opacity: 1
-        })
-      }}
-      className='relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-5 md:py-3 md:text-base'
-    >
-      {children}
-    </li>
-  )
-}
-
-const Cursor = ({ position }) => {
-  return (
-    <motion.li
-      animate={{
-        ...position
-      }}
-      className='absolute z-0 h-7 rounded-full bg-black md:h-12'
-    />
+    <header className='flex w-full items-center justify-center py-6 sm:py-8'>
+      <nav className='flex gap-x-4'>
+        <Link
+          href='/'
+          className={cn(
+            buttonVariants({
+              variant: pathname === '/' ? 'default' : 'outline',
+              size: 'sm'
+            })
+          )}
+        >
+          Current
+        </Link>
+        <Link
+          href='/legendary'
+          className={cn(
+            buttonVariants({
+              variant: pathname === '/legendary' ? 'default' : 'outline',
+              size: 'sm'
+            })
+          )}
+        >
+          Legendary
+        </Link>
+      </nav>
+    </header>
   )
 }

@@ -1,5 +1,22 @@
 // TYPES
 
+interface LegendaryRivalry {
+  id: number
+  slug: string
+  team: string
+  seasons: Array<{ year: number }>
+  primaryColor: string
+  secondaryColor: string
+  drivers: Array<{
+    id: number
+    firstName: string
+    lastName: string
+    code: string
+    pictureUrl: string
+    slug: string
+  }>
+}
+
 interface DriverStats {
   qualifying: string
   race: string
@@ -22,37 +39,11 @@ interface DriverStats {
   pointsPerRace: number
 }
 
-interface ConstructorStanding {
-  position: string
-  positionText: string
-  points: string
-  wins: string
-  Constructor: {
-    constructorId: string
-    url: string
-    name: string
-    nationality: string
-  }
-}
-
 // CONSTANTS
 
-const BASE_URL = 'http://ergast.com/api/f1'
+const BASE_URL = 'https://api.jolpi.ca/ergast/f1/'
 
 // FUNCTIONS
-
-export const getSeasonRaces = async ({ seasonSlug }) => {
-  const seasonRacesResult = await fetch(`${BASE_URL}/${seasonSlug}.json`)
-
-  if (!seasonRacesResult.ok) return undefined
-
-  const { MRData: seasonRacesData } = await seasonRacesResult.json()
-
-  return {
-    seasonRaces: seasonRacesData.RaceTable.Races,
-    totalSeasonRaces: seasonRacesData.total
-  }
-}
 
 const fetchErgastData = async (endpoint: string) => {
   const response = await fetch(`${BASE_URL}${endpoint}`)
@@ -100,6 +91,19 @@ const comparePositions = (
   })
 
   return { driver1Better, driver2Better }
+}
+
+export const getSeasonRaces = async ({ seasonSlug }) => {
+  const seasonRacesResult = await fetch(`${BASE_URL}/${seasonSlug}.json`)
+
+  if (!seasonRacesResult.ok) return undefined
+
+  const { MRData: seasonRacesData } = await seasonRacesResult.json()
+
+  return {
+    seasonRaces: seasonRacesData.RaceTable.Races,
+    totalSeasonRaces: seasonRacesData.total
+  }
 }
 
 const getDriverStats = async (
@@ -354,5 +358,71 @@ export const getConstructorStandings = async ({
     wins: Number(standings.wins),
     constructorName: standings.Constructor.name,
     nationality: standings.Constructor.nationality
+  }
+}
+
+// LEGENDARY
+
+export const getLegendaryRivalryOverallResults = async (
+  rivalry: LegendaryRivalry
+) => {
+  // Get results for each season
+  const seasonsResults = await Promise.all(
+    rivalry.seasons.map(async season => {
+      const results = await getDriversSeasonStats({
+        season: season.year.toString(),
+        driverOne: rivalry.drivers[0].slug,
+        driverTwo: rivalry.drivers[1].slug
+      })
+      return results
+    })
+  )
+  console.log(JSON.stringify(seasonsResults, null, 2), 'xxx')
+
+  // Initialize combined stats
+  const combinedStats = {
+    driverOne: {
+      points: 0,
+      wins: 0,
+      poles: 0,
+      podiums: 0,
+      fastestLaps: 0
+    },
+    driverTwo: {
+      points: 0,
+      wins: 0,
+      poles: 0,
+      podiums: 0,
+      fastestLaps: 0
+    }
+  }
+
+  // Sum up stats across seasons
+  seasonsResults.forEach(season => {
+    if (!season) return
+
+    // Driver One
+    combinedStats.driverOne.points += Number(season.driverOnePoints)
+    combinedStats.driverOne.wins += Number(season.driverOneWins)
+    combinedStats.driverOne.poles += Number(season.driverOnePoles)
+    combinedStats.driverOne.podiums += Number(season.driverOnePodiums)
+    combinedStats.driverOne.fastestLaps += Number(season.driverOneFastestLaps)
+
+    // Driver Two
+    combinedStats.driverTwo.points += Number(season.driverTwoPoints)
+    combinedStats.driverTwo.wins += Number(season.driverTwoWins)
+    combinedStats.driverTwo.poles += Number(season.driverTwoPoles)
+    combinedStats.driverTwo.podiums += Number(season.driverTwoPodiums)
+    combinedStats.driverTwo.fastestLaps += Number(season.driverTwoFastestLaps)
+  })
+
+  return {
+    ...combinedStats,
+    totalSeasons: rivalry.seasons.length,
+    teamName: rivalry.team,
+    primaryColor: rivalry.primaryColor,
+    secondaryColor: rivalry.secondaryColor,
+    driverOne: rivalry.drivers[0],
+    driverTwo: rivalry.drivers[1]
   }
 }
