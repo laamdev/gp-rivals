@@ -525,3 +525,22 @@ export const getLegendaryRivalryOverallResults = async (
     }
   }
 }
+
+export const getSeasonTeams = async (season: string) => {
+  const data = await fetchErgastData(`/${season}/constructorStandings.json`)
+
+  if (!data?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings) {
+    return undefined
+  }
+
+  return data.StandingsTable.StandingsLists[0].ConstructorStandings.map(
+    (constructor: any) => ({
+      name: constructor.Constructor.name,
+      id: constructor.Constructor.constructorId,
+      nationality: constructor.Constructor.nationality,
+      position: Number(constructor.position),
+      points: Number(constructor.points),
+      wins: Number(constructor.wins)
+    })
+  )
+}

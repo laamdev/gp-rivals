@@ -6,6 +6,7 @@ import { MainHeader } from '@/components/global/main-header'
 
 import { cn } from '@/lib/utils'
 import { seasons } from '@/data/seasons'
+import { getSeasonTeams } from '@/api/queries'
 
 export default async function HomePage() {
   const season = seasons.find(season => season.year === 2024)
@@ -13,6 +14,8 @@ export default async function HomePage() {
   if (!season) {
     return null
   }
+
+  // // const teams = await getSeasonTeams('2024')
 
   return (
     <MaxWidthWrapper>
