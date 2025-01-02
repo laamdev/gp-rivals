@@ -1,20 +1,13 @@
 import Image from 'next/image'
 
-import { DriversHeader } from '@/components/global/drivers-header'
-import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
-import { RaceDriverStats } from '@/components/global/race-driver-stats'
-import { PrivateResultType } from '@prisma/client/runtime/library'
-import { DriverStats } from '@/components/legendary/driver-stats'
+import { OverallDriverStats } from '@/components/legendary/overall-driver-stats'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
 
 import { cn } from '@/lib/utils'
-import {
-  getDriversRaceStats,
-  getLegendaryRivalryOverallResults,
-  getSeasonRaces
-} from '@/lib/fetchers'
+import { getLegendaryRivalryOverallResults } from '@/api/queries'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
+import { SectionHeading } from '@/components/global/section-heading'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{
@@ -64,19 +57,19 @@ export default async function LegendaryRivalryPage({
         />
       </section>
 
-      <SeasonsNav seasons={rivalry.seasons} rivalry={rivalry.slug} />
+      <SeasonsNav seasons={rivalry.seasons} rivalry={rivalrySlug} />
 
       <div className='mt-16 flex flex-col gap-y-16'>
         <div>
-          <h2 className='text-center text-lg font-bold'>{`Overall Rivalry Stats`}</h2>
+          <SectionHeading>{`Overall Rivalry Stats`}</SectionHeading>
           <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
-            <DriverStats
+            <OverallDriverStats
               driverNumber={1}
               result={result}
               color={rivalry.primaryColor}
               driver={rivalry.drivers[0].code}
             />
-            <DriverStats
+            <OverallDriverStats
               driverNumber={2}
               result={result}
               color={rivalry.secondaryColor}

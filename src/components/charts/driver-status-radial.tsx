@@ -50,8 +50,6 @@ export const DriverStatusRadial = ({ statusDetails }) => {
     }, {})
   } satisfies ChartConfig
 
-  console.log(JSON.stringify(chartData, null, 2), 'yyy')
-
   return (
     <Card className='flex flex-col'>
       <CardHeader className='items-center pb-0'>

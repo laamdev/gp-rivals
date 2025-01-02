@@ -40,7 +40,7 @@ export const DriversHeader = ({
       />
       <div className='flex flex-col items-center sm:gap-y-2'>
         <h2 className='text-xs font-medium uppercase tracking-widest text-zinc-100 sm:text-base'>
-          {team.name} · {season} {raceName ?? ''}
+          {team.name} · {season} {raceName ?? 'Season'}
         </h2>
         <h1 className='text-center font-serif text-base font-bold sm:text-5xl'>{`${team.drivers[0]?.lastName} vs ${team.drivers[1]?.lastName}`}</h1>
       </div>

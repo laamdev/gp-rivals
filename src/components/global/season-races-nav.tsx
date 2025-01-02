@@ -10,12 +10,12 @@ interface SeasonRacesNavProps {
 
 export const SeasonRacesNav = async ({
   teamSlug,
-  seasonRaces,
-  seasonSlug
+  seasonSlug,
+  seasonRaces
 }: SeasonRacesNavProps) => {
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
-      <NavLink href={`/${seasonSlug}/team/${teamSlug}`} activeFilter={teamSlug}>
+      <NavLink href={`/${seasonSlug}/${teamSlug}`} activeFilter={teamSlug}>
         Full Season
       </NavLink>
 
@@ -26,7 +26,7 @@ export const SeasonRacesNav = async ({
         return (
           <NavLink
             key={`${race.country}-${race.startDate}`}
-            href={`/${seasonSlug}/team/${teamSlug}/gp/${race.Circuit.circuitId}`}
+            href={`/${seasonSlug}/${teamSlug}/${race.Circuit.circuitId}`}
             activeFilter={race.Circuit.circuitId}
             disabled={isFutureRace}
           >

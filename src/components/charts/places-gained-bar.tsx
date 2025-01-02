@@ -1,22 +1,17 @@
 'use client'
 
-import { Bar, BarChart, CartesianGrid, Cell, LabelList } from 'recharts'
+import { Bar, BarChart, ReferenceLine, Cell, LabelList } from 'recharts'
 import { ChartLineUp, ChartLineDown } from '@phosphor-icons/react'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart'
+
+import { cn, isLightColor } from '@/lib/utils'
 
 const chartConfig = {
   difference: {
@@ -28,10 +23,12 @@ export const PlacesGainBar = ({
   positionChanges,
   totalPositionsGained,
   driver,
-  season
+  season,
+  color
 }) => {
   const chartData = positionChanges.map(position => ({
     race: position.race,
+    flag: position.flag,
     grid: position.grid,
     finish: position.finish,
     difference:
@@ -40,18 +37,22 @@ export const PlacesGainBar = ({
         : parseInt(position.placesGained)
   }))
 
-  console.log(JSON.stringify(chartData, null, 2), 'chartData')
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{`Places Gained / Lost - ${driver}`}</CardTitle>
-        <CardDescription>{`${season} Season`}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className=''>
+      <div
+        className={cn(
+          'rounded-t-xl p-4 text-center font-serif text-base sm:p-6 sm:text-lg',
+          isLightColor(color) ? 'text-zinc-900' : 'text-white'
+        )}
+        style={{ background: color }}
+      >
+        {driver.code}
+      </div>
+
+      <CardContent className='py-12'>
         <ChartContainer config={chartConfig}>
           <BarChart data={chartData}>
-            {/* <CartesianGrid vertical={false} /> */}
+            <ReferenceLine y={0} stroke='#ffffff' strokeDasharray='3 3' />
             <ChartTooltip
               filterNull={false}
               includeHidden={true}
@@ -90,7 +91,12 @@ export const PlacesGainBar = ({
               }
             />
             <Bar dataKey='difference'>
-              <LabelList position='top' dataKey='race' fillOpacity={1} />
+              <LabelList
+                position='top'
+                dataKey='flag'
+                fillOpacity={1}
+                fontSize={20}
+              />
               {chartData.map(item => (
                 <Cell
                   key={item.race}
@@ -106,17 +112,32 @@ export const PlacesGainBar = ({
             </Bar>
           </BarChart>
         </ChartContainer>
-        <CardFooter className='mt-8 flex-col items-start gap-2 text-sm'>
-          <div className='flex gap-2 font-medium leading-none'>
-            {`${driver} ${totalPositionsGained >= 0 ? 'gained' : 'lost'} ${totalPositionsGained < 0 ? totalPositionsGained * -1 : totalPositionsGained} places in the ${season} season races.`}
+        <CardFooter className='mt-8 flex-col items-center gap-2 text-sm'>
+          <div className='flex items-baseline gap-x-1 font-medium leading-none'>
+            <span className={cn('font-bold')} style={{ color: color }}>
+              {`${driver.code} `}
+            </span>
+            {`${totalPositionsGained >= 0 ? 'gained' : 'lost'} `}
+            <span
+              className='font-bold'
+              style={{
+                color:
+                  totalPositionsGained > 0
+                    ? '#16a34a'
+                    : totalPositionsGained < 0
+                      ? '#dc2626'
+                      : '#2563eb'
+              }}
+            >
+              {`${totalPositionsGained >= 0 ? '+' : '-'}${Math.abs(totalPositionsGained)}`}
+            </span>
+
+            {` places in the ${season} season races.`}
             {totalPositionsGained > 0 ? (
               <ChartLineUp className='size-4' />
             ) : (
               <ChartLineDown className='size-4' />
             )}
-          </div>
-          <div className='leading-none text-muted-foreground'>
-            {`Total places gained / lost in the ${chartData.length} races of the ${season} season.`}
           </div>
         </CardFooter>
       </CardContent>

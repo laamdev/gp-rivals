@@ -1,5 +1,4 @@
-import { Equals, Star } from '@phosphor-icons/react/dist/ssr'
-
+import { Asterisk, Star } from '@phosphor-icons/react/dist/ssr'
 import { cn } from '@/lib/utils'
 
 interface StatCardProps {
@@ -7,30 +6,38 @@ interface StatCardProps {
   value: string | number
   comparison: boolean | 'tie'
   className?: string
+  isLast?: boolean
+  isSecondToLast?: boolean
 }
 
 export const StatCard = ({
   title,
   value,
   comparison,
-  className
+  className,
+  isLast,
+  isSecondToLast
 }: StatCardProps) => (
   <div
     className={cn(
       'relative flex flex-col border bg-card p-2 text-center text-card-foreground shadow-sm sm:p-4',
+      {
+        'rounded-br-xl': isLast,
+        'rounded-bl-xl': isSecondToLast
+      },
       className
     )}
   >
     {comparison === 'tie' ? (
-      <Equals
+      <Asterisk
         weight='bold'
-        className='absolute right-2 top-2 z-50 size-3 text-blue-500'
+        className='absolute right-2 top-2 z-50 size-4 text-blue-500'
         aria-label='Equal performance'
       />
     ) : comparison ? (
       <Star
         weight='fill'
-        className='absolute right-2 top-2 z-50 size-3 text-yellow-500'
+        className='absolute right-2 top-2 z-50 size-4 text-yellow-500'
         aria-label='Better performance'
       />
     ) : null}

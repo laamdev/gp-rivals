@@ -1,10 +1,10 @@
 'use client'
 
-import { TrendingUp } from 'lucide-react'
+// // import { TrendingUp } from 'lucide-react'
 import {
   PolarAngleAxis,
   PolarGrid,
-  PolarRadiusAxis,
+  // // PolarRadiusAxis,
   Radar,
   RadarChart
 } from 'recharts'
@@ -13,7 +13,7 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
+  // // CardFooter,
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
@@ -23,6 +23,8 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart'
+
+import { SEASON_LAPS_2024 } from '@/api/constants'
 
 export const OverallPerformanceRadar = ({
   bestDriverPoints,
@@ -34,17 +36,28 @@ export const OverallPerformanceRadar = ({
   driverTwo,
   driverOneRaceAverage,
   driverTwoRaceAverage,
-  driverOneQualifyingAverage,
-  driverTwoQualifyingAverage,
-  driverOneLapsCompleted,
-  driverTwoLapsCompleted
+  driverOneGridAverage,
+  driverTwoGridAverage,
+  driverOneCompletedLaps,
+  driverTwoCompletedLaps,
+  // // driverOneWins,
+  // // driverTwoWins,
+  driverOnePodiumPercentage,
+  driverTwoPodiumPercentage
+  // // driverOnePoles,
+  // // driverTwoPoles,
+  // // driverOneFastestLaps,
+  // // driverTwoFastestLaps,
+  // // driverOnePositionChanges,
+  // // driverTwoPositionChanges
 }) => {
   const maxValues = {
     'Points (vs. best driver)': bestDriverPoints,
     Points: 672,
     'Average Race Result': 20,
     'Average Grid Position': 20,
-    'Laps Completed': 1444
+    'Laps Completed': SEASON_LAPS_2024,
+    'Podium Rate': 100
   }
 
   const chartData = [
@@ -59,7 +72,7 @@ export const OverallPerformanceRadar = ({
       maxValue: maxValues['Points (vs. best driver)']
     },
     {
-      stat: 'Points',
+      stat: 'Points (vs. total)',
       driverOne: (driverOnePoints / maxValues['Points']) * 100,
       driverTwo: (driverTwoPoints / maxValues['Points']) * 100,
       driverOneOriginal: driverOnePoints,
@@ -85,24 +98,32 @@ export const OverallPerformanceRadar = ({
       stat: 'Grid Average Position',
       // Invert the scale since lower position is better
       driverOne:
-        ((maxValues['Average Grid Position'] - driverOneQualifyingAverage) /
+        ((maxValues['Average Grid Position'] - driverOneGridAverage) /
           (maxValues['Average Grid Position'] - 1)) *
         100,
       driverTwo:
-        ((maxValues['Average Grid Position'] - driverTwoQualifyingAverage) /
+        ((maxValues['Average Grid Position'] - driverTwoGridAverage) /
           (maxValues['Average Grid Position'] - 1)) *
         100,
-      driverOneOriginal: driverOneQualifyingAverage,
-      driverTwoOriginal: driverTwoQualifyingAverage,
+      driverOneOriginal: driverOneGridAverage,
+      driverTwoOriginal: driverTwoGridAverage,
       maxValue: maxValues['Average Grid Position']
     },
     {
       stat: 'Laps Completed',
-      driverOne: (driverOneLapsCompleted / maxValues['Laps Completed']) * 100,
-      driverTwo: (driverTwoLapsCompleted / maxValues['Laps Completed']) * 100,
-      driverOneOriginal: driverOneLapsCompleted,
-      driverTwoOriginal: driverTwoLapsCompleted,
+      driverOne: (driverOneCompletedLaps / maxValues['Laps Completed']) * 100,
+      driverTwo: (driverTwoCompletedLaps / maxValues['Laps Completed']) * 100,
+      driverOneOriginal: driverOneCompletedLaps,
+      driverTwoOriginal: driverTwoCompletedLaps,
       maxValue: maxValues['Laps Completed']
+    },
+    {
+      stat: 'Podium Rate',
+      driverOne: driverOnePodiumPercentage,
+      driverTwo: driverTwoPodiumPercentage,
+      driverOneOriginal: `${driverOnePodiumPercentage}%`,
+      driverTwoOriginal: `${driverTwoPodiumPercentage}%`,
+      maxValue: maxValues['Podium Rate']
     }
   ]
 
@@ -201,14 +222,14 @@ export const OverallPerformanceRadar = ({
           </RadarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className='flex-col gap-2 text-sm'>
+      {/* <CardFooter className='flex-col gap-2 text-sm'>
         <div className='flex items-center gap-2 font-medium leading-none'>
           Trending up by 5.2% this stat <TrendingUp className='h-4 w-4' />
         </div>
         <div className='flex items-center gap-2 leading-none text-muted-foreground'>
           January - June 2024
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }

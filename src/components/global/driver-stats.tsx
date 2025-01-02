@@ -62,22 +62,22 @@ export const DriverStats = ({
         driverNumber === 1
           ? result.driverOneRaceAverage
           : result.driverTwoRaceAverage,
-      type: 'race'
+      type: 'raceAverage'
     },
     {
-      title: 'Qualifying Position Average',
+      title: 'Grid Position Average',
       value:
         driverNumber === 1
-          ? result.driverOneQualifyingAverage
-          : result.driverTwoQualifyingAverage,
-      type: 'qualifying'
+          ? result.driverOneGridAverage
+          : result.driverTwoGridAverage,
+      type: 'gridAverage'
     },
     {
       title: 'Pole to Win Ratio',
       value:
         driverNumber === 1
-          ? `${result.driverOnePoleToWinRatio?.toFixed(1)}%`
-          : `${result.driverTwoPoleToWinRatio?.toFixed(1)}%`,
+          ? `${result.driverOnePoleToWinRatio?.toFixed(2)}%`
+          : `${result.driverTwoPoleToWinRatio?.toFixed(2)}%`,
       type: 'poleToWinRatio'
     },
     {

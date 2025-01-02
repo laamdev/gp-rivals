@@ -23,11 +23,7 @@ export default async function HomePage() {
       <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2'>
         {season &&
           season.teams.map(team => (
-            <Link
-              href={`/2024/team/${team.slug}`}
-              key={team.id}
-              className='group'
-            >
+            <Link href={`/2024/${team.slug}`} key={team.id} className='group'>
               <ul
                 className={cn('mt-4 grid grid-cols-2 rounded-t-xl')}
                 style={{

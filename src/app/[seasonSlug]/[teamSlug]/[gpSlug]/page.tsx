@@ -1,12 +1,10 @@
 import { DriversHeader } from '@/components/global/drivers-header'
 import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
+import { DriverStats } from '@/components/global/driver-stats'
 
 import { seasons } from '@/data/seasons'
-import { getDriversRaceStats, getSeasonRaces } from '@/lib/fetchers'
-import { RaceDriverStats } from '@/components/global/race-driver-stats'
-import { PrivateResultType } from '@prisma/client/runtime/library'
-import { DriverStats } from '@/components/global/driver-stats'
+import { getDriversRaceStats, getSeasonRaces } from '@/api/queries'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{

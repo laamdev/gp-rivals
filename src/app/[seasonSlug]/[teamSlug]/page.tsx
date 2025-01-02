@@ -4,7 +4,7 @@ import { SeasonRacesNav } from '@/components/global/season-races-nav'
 import { DriverStats } from '@/components/global/driver-stats'
 import { HeadToHeadRadial } from '@/components/charts/head-to-head-radial'
 import { OverallPerformanceRadar } from '@/components/charts/overall-performance-radar'
-import { StatusPieChart } from '@/components/charts/status-pie-chart'
+// // import { StatusPieChart } from '@/components/charts/status-pie-chart'
 import { PlacesGainBar } from '@/components/charts/places-gained-bar'
 import { SectionHeading } from '@/components/global/section-heading'
 import { StatCard } from '@/components/global/stat-card'
@@ -14,9 +14,10 @@ import {
   getDriversSeasonStats,
   getSeasonChampion,
   getSeasonRaces
-} from '@/lib/fetchers'
+} from '@/api/queries'
 import { formatPosition } from '@/lib/utils'
 import { seasons } from '@/data/seasons'
+
 interface TeamSeasonPageProps {
   params: Promise<{
     seasonSlug: string
@@ -24,18 +25,16 @@ interface TeamSeasonPageProps {
   }>
 }
 
+export async function generateStaticParams() {
+  const teams = await seasons.find(season => season.year === 2024)?.teams
+
+  return teams?.map(team => ({
+    slug: team.slug
+  }))
+}
+
 export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   const { seasonSlug, teamSlug } = await params
-
-  const teamOverallStats = await getConstructorStandings({
-    season: seasonSlug,
-    constructorId: teamSlug
-  })
-
-  if (!teamOverallStats) {
-    console.log(JSON.stringify('bang 1!'))
-    return null
-  }
 
   const team = await (async () => {
     const season = seasons.find(season => season.year === Number(seasonSlug))
@@ -52,37 +51,28 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
   })()
 
   if (!team) {
-    console.log(JSON.stringify('bang 2!'))
     return null
   }
 
-  const racesResult = await getSeasonRaces({ seasonSlug })
+  const [teamOverallStats, racesResult, champion, result] = await Promise.all([
+    getConstructorStandings({
+      season: seasonSlug,
+      constructorId: teamSlug
+    }),
+    getSeasonRaces({ seasonSlug }),
+    getSeasonChampion(seasonSlug),
+    getDriversSeasonStats({
+      season: seasonSlug,
+      driverOne: team.drivers[0].slug,
+      driverTwo: team.drivers[1].slug
+    })
+  ])
 
-  if (!racesResult) {
-    console.log(JSON.stringify('bang 3!'))
-    return null
-  }
-
-  const { seasonRaces } = racesResult
-
-  const champion = await getSeasonChampion(seasonSlug)
-
-  if (!champion) {
-    console.log(JSON.stringify('bang 4!'))
-    return null
-  }
-
-  const result = await getDriversSeasonStats({
-    season: seasonSlug,
-    driverOne: team.drivers[0].slug,
-    driverTwo: team.drivers[1].slug
-  })
-
-  if (!result) {
+  if (!teamOverallStats || !racesResult || !champion || !result) {
     return <div>No data available</div>
   }
 
-  console.log(JSON.stringify(result, null, 2), 'XXX')
+  const { seasonRaces } = racesResult
 
   return (
     <MaxWidthWrapper>
@@ -134,10 +124,12 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               driverTwo={team.drivers[1].lastName}
               driverOneRaceAverage={result.driverOneRaceAverage}
               driverTwoRaceAverage={result.driverTwoRaceAverage}
-              driverOneQualifyingAverage={result.driverOneQualifyingAverage}
-              driverTwoQualifyingAverage={result.driverTwoQualifyingAverage}
-              driverOneLapsCompleted={result.driverOneLapsCompleted}
-              driverTwoLapsCompleted={result.driverTwoLapsCompleted}
+              driverOneGridAverage={result.driverOneGridAverage}
+              driverTwoGridAverage={result.driverTwoGridAverage}
+              driverOneCompletedLaps={result.driverOneCompletedLaps}
+              driverTwoCompletedLaps={result.driverTwoCompletedLaps}
+              driverOnePodiumPercentage={result.driverOnePodiumPercentage}
+              driverTwoPodiumPercentage={result.driverTwoPodiumPercentage}
             />
           </div>
           <div className='mt-6 grid grid-cols-2 gap-x-6 sm:mt-8 sm:gap-x-8'>
@@ -175,7 +167,7 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               driverTwoValue={result.driverTwoBetterFinishes}
             />
             <HeadToHeadRadial
-              competition='qualifying'
+              competition='grid'
               year={seasonSlug}
               team={team.name}
               driverOne={team.drivers[0].lastName}
@@ -183,34 +175,40 @@ export default async function TeamSeasonPage({ params }: TeamSeasonPageProps) {
               primaryColor={team.primaryColor}
               secondaryColor={team.secondaryColor}
               totalRaces={seasonRaces.length}
-              driverOneValue={result.driverOneBetterQualifying}
-              driverTwoValue={result.driverTwoBetterQualifying}
+              driverOneValue={result.driverOneBetterGrid}
+              driverTwoValue={result.driverTwoBetterGrid}
             />
           </div>
         </div>
+
         <div>
+          <SectionHeading>{`${seasonSlug} Places Gained / Lost`}</SectionHeading>
+          <div className='grid grid-cols-2 gap-6 sm:mt-8 sm:gap-8'>
+            <PlacesGainBar
+              positionChanges={result.driverOnePositionChanges}
+              totalPositionsGained={result.driverOneTotalPositionsGained}
+              driver={team.drivers[0]}
+              color={team.primaryColor}
+              season={seasonSlug}
+            />
+            <PlacesGainBar
+              positionChanges={result.driverTwoPositionChanges}
+              totalPositionsGained={result.driverTwoTotalPositionsGained}
+              driver={team.drivers[1]}
+              color={team.secondaryColor}
+              season={seasonSlug}
+            />
+          </div>
+        </div>
+
+        {/* <div>
           <SectionHeading>{`${seasonSlug} Other Stats`}</SectionHeading>
 
           <div className='mt-6 grid grid-cols-2 gap-6 sm:mt-8 sm:gap-8'>
             <StatusPieChart status={result.driverOneStatus} />
             <StatusPieChart status={result.driverTwoStatus} />
           </div>
-
-          <div className='mt-6 grid gap-6 sm:mt-8 sm:gap-8'>
-            <PlacesGainBar
-              positionChanges={result.driverOnePositionChanges}
-              totalPositionsGained={result.driverOneTotalPositionsGained}
-              driver={team.drivers[0].lastName}
-              season={seasonSlug}
-            />
-            <PlacesGainBar
-              positionChanges={result.driverTwoPositionChanges}
-              totalPositionsGained={result.driverTwoTotalPositionsGained}
-              driver={team.drivers[1].lastName}
-              season={seasonSlug}
-            />
-          </div>
-        </div>
+        </div> */}
       </div>
     </MaxWidthWrapper>
   )

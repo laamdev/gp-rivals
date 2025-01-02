@@ -192,6 +192,45 @@ export const getTotalCounts = statuses => {
 
 export const isEqual = (a: number, b: number) => Math.abs(a - b) < 0.0001
 
+const parseTime = (time: string) => {
+  // Remove the '+' prefix if present
+  const cleanTime = time.replace('+', '')
+  // Convert MM:SS.sss to seconds
+  if (cleanTime.includes(':')) {
+    const [mins, secs] = cleanTime.split(':')
+    return Number(mins) * 60 + Number(secs)
+  }
+  // Already in seconds
+  return Number(cleanTime)
+}
+
+export const isLightColor = (color: string) => {
+  // Convert hex to RGB
+  const hex = color.replace('#', '')
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+
+  // Calculate brightness
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness > 128
+}
+
+export const formatPosition = (position: number): string => {
+  const suffixes = ['th', 'st', 'nd', 'rd']
+  const remainder = position % 100
+
+  // Handle 11, 12, 13 specially
+  if (remainder > 10 && remainder < 14) {
+    return `${position}th`
+  }
+
+  const suffix = suffixes[remainder % 10] || suffixes[0]
+  return `${position}${suffix}`
+}
+
+// STAT COMPARISON
+
 export const compareStats = (
   driverNumber: 1 | 2,
   d1: number,
@@ -205,20 +244,6 @@ export const compareStats = (
   return driverNumber === 1 ? d1 < d2 : d2 < d1
 }
 
-// Add new helper for parsing race times
-const parseTime = (time: string) => {
-  // Remove the '+' prefix if present
-  const cleanTime = time.replace('+', '')
-  // Convert MM:SS.sss to seconds
-  if (cleanTime.includes(':')) {
-    const [mins, secs] = cleanTime.split(':')
-    return Number(mins) * 60 + Number(secs)
-  }
-  // Already in seconds
-  return Number(cleanTime)
-}
-
-// Modify getComparison function to handle race stats
 export const getComparison = (
   type: string,
   driverNumber: 1 | 2,
@@ -300,14 +325,14 @@ export const getComparison = (
       d2: Number(result.driverTwoPodiums),
       higherIsBetter: true
     },
-    race: {
+    raceAverage: {
       d1: Number(result.driverOneRaceAverage),
       d2: Number(result.driverTwoRaceAverage),
       higherIsBetter: false
     },
-    qualifying: {
-      d1: Number(result.driverOneQualifyingAverage),
-      d2: Number(result.driverTwoQualifyingAverage),
+    gridAverage: {
+      d1: Number(result.driverOneGridAverage),
+      d2: Number(result.driverTwoGridAverage),
       higherIsBetter: false
     },
     poleToWinRatio: {
@@ -327,27 +352,70 @@ export const getComparison = (
   return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
 }
 
-export const isLightColor = (color: string) => {
-  // Convert hex to RGB
-  const hex = color.replace('#', '')
-  const r = parseInt(hex.substr(0, 2), 16)
-  const g = parseInt(hex.substr(2, 2), 16)
-  const b = parseInt(hex.substr(4, 2), 16)
-
-  // Calculate brightness
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000
-  return brightness > 128
-}
-
-export const formatPosition = (position: number): string => {
-  const suffixes = ['th', 'st', 'nd', 'rd']
-  const remainder = position % 100
-
-  // Handle 11, 12, 13 specially
-  if (remainder > 10 && remainder < 14) {
-    return `${position}th`
+export const getLegendaryComparison = (
+  type: string,
+  driverNumber: 1 | 2,
+  result: any
+) => {
+  const legendaryStats = {
+    points: {
+      d1: Number(result.driverOne.points),
+      d2: Number(result.driverTwo.points),
+      higherIsBetter: true
+    },
+    wins: {
+      d1: Number(result.driverOne.wins),
+      d2: Number(result.driverTwo.wins),
+      higherIsBetter: true
+    },
+    poles: {
+      d1: Number(result.driverOne.gridFirst),
+      d2: Number(result.driverTwo.gridFirst),
+      higherIsBetter: true
+    },
+    podiums: {
+      d1: Number(result.driverOne.podiums),
+      d2: Number(result.driverTwo.podiums),
+      higherIsBetter: true
+    },
+    fastestLaps: {
+      d1: Number(result.driverOne.fastestLaps),
+      d2: Number(result.driverTwo.fastestLaps),
+      higherIsBetter: true
+    },
+    averageRacePosition: {
+      d1: Number(result.driverOne.averagePosition),
+      d2: Number(result.driverTwo.averagePosition),
+      higherIsBetter: false
+    },
+    averageGridPosition: {
+      d1: Number(result.driverOne.averageGridPosition),
+      d2: Number(result.driverTwo.averageGridPosition),
+      higherIsBetter: false
+    },
+    pointsPerRace: {
+      d1: Number(result.driverOne.pointsPerRace),
+      d2: Number(result.driverTwo.pointsPerRace),
+      higherIsBetter: true
+    },
+    poleToWinRatio: {
+      d1: Number(result.driverOne.poleToWinRatio),
+      d2: Number(result.driverTwo.poleToWinRatio),
+      higherIsBetter: true
+    },
+    championships: {
+      d1: Number(result.driverOne.championships),
+      d2: Number(result.driverTwo.championships),
+      higherIsBetter: true
+    },
+    dnfs: {
+      d1: Number(result.driverOne.dnfs),
+      d2: Number(result.driverTwo.dnfs),
+      higherIsBetter: false
+    }
   }
 
-  const suffix = suffixes[remainder % 10] || suffixes[0]
-  return `${position}${suffix}`
+  const stat = legendaryStats[type as keyof typeof legendaryStats]
+  if (!stat) return false
+  return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
 }

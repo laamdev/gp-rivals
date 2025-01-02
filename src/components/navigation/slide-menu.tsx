@@ -21,7 +21,7 @@ export const Menu = () => {
             })
           )}
         >
-          Current
+          2024
         </Link>
         <Link
           href='/legendary'
