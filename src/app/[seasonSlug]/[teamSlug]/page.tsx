@@ -25,11 +25,16 @@ interface TeamSeasonPageProps {
   }>
 }
 
-export async function generateStaticParams() {
-  const teams = await seasons.find(season => season.year === 2024)?.teams
+export async function generateStaticParams({
+  params
+}: TeamSeasonPageProps): Promise<{ teamSlug: string }[]> {
+  const { seasonSlug } = await params
 
-  return teams?.map(team => ({
-    slug: team.slug
+  const teams =
+    seasons.find(season => season.year === Number(seasonSlug))?.teams || []
+
+  return teams.map(team => ({
+    teamSlug: team.slug
   }))
 }
 

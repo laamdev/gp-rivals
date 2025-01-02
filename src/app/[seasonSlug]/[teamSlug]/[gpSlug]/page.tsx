@@ -14,7 +14,25 @@ interface TeamSeasonGpPageProps {
   }>
 }
 
-export default async function TeamSeasonGPPage({
+export async function generateStaticParams({
+  params
+}: TeamSeasonGpPageProps): Promise<{ gpSlug: string }[]> {
+  const { seasonSlug } = await params
+
+  const data = await getSeasonRaces({ seasonSlug })
+
+  if (!data) {
+    return []
+  }
+
+  const { seasonRaces } = data
+
+  return seasonRaces.map(race => ({
+    gpSlug: race.slug
+  }))
+}
+
+export default async function TeamSeasonGpPage({
   params
 }: TeamSeasonGpPageProps) {
   const { seasonSlug, teamSlug, gpSlug } = await params

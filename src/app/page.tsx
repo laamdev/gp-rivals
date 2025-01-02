@@ -18,8 +18,6 @@ export default async function HomePage() {
     <MaxWidthWrapper>
       <MainHeader />
 
-      {/* <SeasonsNav /> */}
-
       <div className='mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2'>
         {season &&
           season.teams.map(team => (
