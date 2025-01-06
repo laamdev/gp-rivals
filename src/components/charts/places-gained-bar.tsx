@@ -31,11 +31,19 @@ export const PlacesGainBar = ({
     flag: position.flag,
     grid: position.grid,
     finish: position.finish,
-    difference:
-      position.placesGained === 0
-        ? String(position.placesGained)
-        : parseInt(position.placesGained)
+    difference: position.placesGained
   }))
+
+  // Calculate total positions gained excluding DNFs
+  const totalPositionsExcludingDNFs = positionChanges.reduce(
+    (total, position) => {
+      if (position.finish !== 'DNF') {
+        return total + (position.placesGained || 0)
+      }
+      return total
+    },
+    0
+  )
 
   return (
     <Card className=''>
@@ -82,7 +90,13 @@ export const PlacesGainBar = ({
                         </div>
                         <div className='flex justify-between border-t pt-2 text-xs font-medium'>
                           <span>Difference:</span>
-                          <span className='font-mono'>{item.difference}</span>
+                          <span className='font-mono'>
+                            {item.finish === 'DNF'
+                              ? 'DNF'
+                              : item.difference > 0
+                                ? `+${item.difference}`
+                                : item.difference}
+                          </span>
                         </div>
                       </div>
                     )
@@ -101,11 +115,13 @@ export const PlacesGainBar = ({
                 <Cell
                   key={item.race}
                   fill={
-                    item.difference > 0
-                      ? '#16a34a'
-                      : item.difference == 0
-                        ? '#2563eb'
-                        : '#dc2626'
+                    item.finish === 'DNF'
+                      ? '#6b7280' // gray for DNF
+                      : item.difference > 0
+                        ? '#16a34a' // green for gains
+                        : item.difference === 0
+                          ? '#2563eb' // blue for no change
+                          : '#dc2626' // red for losses
                   }
                 />
               ))}
@@ -117,23 +133,22 @@ export const PlacesGainBar = ({
             <span className={cn('font-bold')} style={{ color: color }}>
               {`${driver.code} `}
             </span>
-            {`${totalPositionsGained >= 0 ? 'gained' : 'lost'} `}
+            {`${totalPositionsExcludingDNFs >= 0 ? 'gained' : 'lost'} `}
             <span
               className='font-bold'
               style={{
                 color:
-                  totalPositionsGained > 0
+                  totalPositionsExcludingDNFs > 0
                     ? '#16a34a'
-                    : totalPositionsGained < 0
+                    : totalPositionsExcludingDNFs < 0
                       ? '#dc2626'
                       : '#2563eb'
               }}
             >
-              {`${totalPositionsGained >= 0 ? '+' : '-'}${Math.abs(totalPositionsGained)}`}
+              {`${totalPositionsExcludingDNFs >= 0 ? '+' : ''}${totalPositionsExcludingDNFs}`}
             </span>
-
-            {` places in the ${season} season races.`}
-            {totalPositionsGained > 0 ? (
+            {` places in the ${season} season races (excluding DNFs).`}
+            {totalPositionsExcludingDNFs > 0 ? (
               <ChartLineUp className='size-4' />
             ) : (
               <ChartLineDown className='size-4' />

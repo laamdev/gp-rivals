@@ -49,6 +49,8 @@ export const metadata: Metadata = {
   description: 'Compare the performance of F1 teammates throughout a season.'
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function RootLayout({
   children
 }: Readonly<{

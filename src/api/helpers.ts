@@ -67,11 +67,7 @@ export const calculateDriverStats = (
 
       let displayName = country
 
-      if (country === 'USA') {
-        displayName = `USA (${locality})`
-      }
-
-      if (country === 'United States') {
+      if (country === 'USA' || country === 'United States') {
         displayName = `USA (${locality})`
       }
 
@@ -80,11 +76,7 @@ export const calculateDriverStats = (
       }
 
       const countryData = countries.find(c => {
-        if (country === 'USA') {
-          return c.name.startsWith('USA')
-        }
-
-        if (country === 'United States') {
+        if (country === 'USA' || country === 'United States') {
           return c.name.startsWith('USA')
         }
 
@@ -94,20 +86,34 @@ export const calculateDriverStats = (
         return c.name === country
       })
 
+      const status = race.Results[0].status
+      console.log(`Race: ${race.raceName}, Status: ${status}`)
+      const isDriverDNF = !FINISHED_STATUSES.includes(status)
+
+      if (race.raceName.includes('British')) {
+        console.log({
+          status,
+          isDriverDNF,
+          FINISHED_STATUSES,
+          position: race.Results[0].position
+        })
+      }
+
       return {
         race: displayName,
         flag: countryData?.flag || '🏁',
         grid: parseInt(race.Results[0].grid),
-        finish: parseInt(race.Results[0].position),
-        placesGained:
-          parseInt(race.Results[0].grid) - parseInt(race.Results[0].position),
-        status: race.Results[0].status
+        finish: isDriverDNF ? 'DNF' : parseInt(race.Results[0].position),
+        placesGained: isDriverDNF
+          ? null
+          : parseInt(race.Results[0].grid) - parseInt(race.Results[0].position),
+        status
       }
     }
   )
 
   const totalPositionsGained = positionChanges.reduce(
-    (sum, change) => sum + change.placesGained,
+    (sum, change) => sum + (change.placesGained ?? 0),
     0
   )
 

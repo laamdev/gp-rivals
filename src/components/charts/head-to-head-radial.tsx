@@ -120,9 +120,9 @@ export const HeadToHeadRadial = ({
           {`${driverOne} has finished ahead of ${driverTwo} in ${driverOneValue} ${competition}s`}
           {/* Trending up by 5.2% this month <TrendingUp className='h-4 w-4' /> */}
         </div>
-        <div className='leading-none text-muted-foreground'>
+        {/* <div className='leading-none text-muted-foreground'>
           {`Showing head-to-head in the ${totalRaces} ${competition}s of the ${year} season.`}
-        </div>
+        </div> */}
       </CardFooter>
     </Card>
   )
