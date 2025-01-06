@@ -524,7 +524,9 @@ export const getLegendaryRivalryOverallResults = async (
                 100
               ).toFixed(1)
             )
-          : 0
+          : 0,
+      gridFirst: combinedStats.driverOne.poles,
+      gridFirsts: combinedStats.driverOne.poles
     },
     driverTwo: {
       ...combinedStats.driverTwo,
@@ -554,7 +556,9 @@ export const getLegendaryRivalryOverallResults = async (
                 100
               ).toFixed(1)
             )
-          : 0
+          : 0,
+      gridFirst: combinedStats.driverTwo.poles,
+      gridFirsts: combinedStats.driverTwo.poles
     }
   }
 }

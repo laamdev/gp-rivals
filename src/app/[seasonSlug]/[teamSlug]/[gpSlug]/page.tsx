@@ -19,7 +19,7 @@ export async function generateStaticParams({
 }: TeamSeasonGpPageProps): Promise<{ gpSlug: string }[]> {
   const { seasonSlug } = await params
 
-  const data = await getSeasonRaces({ seasonSlug })
+  const data = await getSeasonRaces(seasonSlug)
 
   if (!data) {
     return []
@@ -55,7 +55,7 @@ export default async function TeamSeasonGpPage({
     return null
   }
 
-  const racesResult = await getSeasonRaces({ seasonSlug })
+  const racesResult = await getSeasonRaces(seasonSlug)
 
   if (!racesResult) {
     return null
