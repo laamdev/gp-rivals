@@ -232,7 +232,7 @@ export const legendaryTeamRivals = [
     team: 'McLaren Mercedes',
     seasons: [
       {
-        year: 2009
+        year: 2007
       }
     ],
     primaryColor: '#C4C4C4',
