@@ -1,36 +1,75 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
-
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { DriverStats } from '@/components/global/driver-stats'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
-
 import { getLegendaryRivalrySeasonStats } from '@/api/queries'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
 import { cn } from '@/lib/utils'
 
-interface TeamSeasonGpPageProps {
-  params: Promise<{
-    rivalrySlug: string
-    yearSlug: string
-  }>
+function Loading() {
+  return (
+    <div className='p-4 text-center'>
+      <p>Loading season data...</p>
+    </div>
+  )
 }
 
-export default async function LegendaryRivalrySeasonPage({
-  params
-}: TeamSeasonGpPageProps) {
-  const { rivalrySlug, yearSlug } = await params
+interface SeasonStatsProps {
+  rivalry: any
+  yearSlug: string
+}
 
-  const rivalry = legendaryTeamRivals.find(r => r.slug === rivalrySlug)
-
-  if (!rivalry) {
-    return null
-  }
-
+async function SeasonStats({ rivalry, yearSlug }: SeasonStatsProps) {
   const result = await getLegendaryRivalrySeasonStats({
     driverOne: rivalry.drivers[0].slug,
     driverTwo: rivalry.drivers[1].slug,
     year: Number(yearSlug)
   })
+
+  if (!result) {
+    return (
+      <div className='p-4 text-center'>
+        <p>No data available for {yearSlug} season</p>
+        <p className='mt-2 text-sm text-gray-500'>
+          Please try again later or contact support if the issue persists.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='mt-16 flex flex-col gap-y-16'>
+      <div>
+        <h2 className='text-center text-lg font-bold'>{`${yearSlug} Season Stats`}</h2>
+        <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
+          <DriverStats
+            driverNumber={1}
+            result={result}
+            color={rivalry.primaryColor}
+            driver={rivalry.drivers[0].code}
+          />
+          <DriverStats
+            driverNumber={2}
+            result={result}
+            color={rivalry.secondaryColor}
+            driver={rivalry.drivers[1].code}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default async function LegendaryRivalrySeasonPage({
+  params
+}: {
+  params: { rivalrySlug: string; yearSlug: string }
+}) {
+  const { rivalrySlug, yearSlug } = params
+  const rivalry = legendaryTeamRivals.find(r => r.slug === rivalrySlug)
+
+  if (!rivalry) return null
 
   return (
     <MaxWidthWrapper>
@@ -64,26 +103,25 @@ export default async function LegendaryRivalrySeasonPage({
 
         <SeasonsNav seasons={rivalry.seasons} rivalry={rivalrySlug} />
 
-        <div className='mt-16 flex flex-col gap-y-16'>
-          <div>
-            <h2 className='text-center text-lg font-bold'>{`${yearSlug} Season Stats`}</h2>
-            <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
-              <DriverStats
-                driverNumber={1}
-                result={result}
-                color={rivalry.primaryColor}
-                driver={rivalry.drivers[0].code}
-              />
-              <DriverStats
-                driverNumber={2}
-                result={result}
-                color={rivalry.secondaryColor}
-                driver={rivalry.drivers[1].code}
-              />
-            </div>
-          </div>
-        </div>
+        <Suspense fallback={<Loading />}>
+          <SeasonStats rivalry={rivalry} yearSlug={yearSlug} />
+        </Suspense>
       </div>
     </MaxWidthWrapper>
   )
+}
+
+export async function generateStaticParams(): Promise<
+  { rivalrySlug: string; yearSlug: string }[]
+> {
+  const params: { rivalrySlug: string; yearSlug: string }[] = []
+  for (const rivalry of legendaryTeamRivals) {
+    for (const season of rivalry.seasons) {
+      params.push({
+        rivalrySlug: rivalry.slug,
+        yearSlug: season.year.toString()
+      })
+    }
+  }
+  return params
 }

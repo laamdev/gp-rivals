@@ -95,7 +95,6 @@ export const seasons = [
         name: 'Mercedes',
         primaryColor: '#00A19C',
         secondaryColor: '#80142B',
-        // // C6C6C6
         drivers: [
           {
             id: 1,
@@ -167,7 +166,7 @@ export const seasons = [
           },
           {
             id: 2,
-            number: 1181,
+            number: 31,
             firstName: 'Esteban',
             lastName: 'Ocon',
             code: 'OCO',
@@ -180,13 +179,13 @@ export const seasons = [
       {
         id: 7,
         slug: 'haas',
-        name: 'Hass',
+        name: 'Haas',
         primaryColor: '#DA291C',
         secondaryColor: '#AEAEAE',
         drivers: [
           {
             id: 1,
-            number: 10,
+            number: 27,
             firstName: 'Nico',
             lastName: 'Hulkenberg',
             code: 'HUL',
@@ -196,7 +195,7 @@ export const seasons = [
           },
           {
             id: 2,
-            number: 1181,
+            number: 20,
             firstName: 'Kevin',
             lastName: 'Magnussen',
             code: 'MAG',
@@ -235,7 +234,6 @@ export const seasons = [
           }
         ]
       },
-
       {
         id: 9,
         slug: 'williams',
@@ -268,7 +266,7 @@ export const seasons = [
       {
         id: 10,
         slug: 'sauber',
-        name: 'kick Sauber',
+        name: 'Kick Sauber',
         primaryColor: '#00e701',
         secondaryColor: '#4D5559',
         drivers: [

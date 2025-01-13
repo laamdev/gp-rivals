@@ -1,32 +1,71 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
-
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { OverallDriverStats } from '@/components/legendary/overall-driver-stats'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
-
+import { SectionHeading } from '@/components/global/section-heading'
 import { cn } from '@/lib/utils'
 import { getLegendaryRivalryOverallResults } from '@/api/queries'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
-import { SectionHeading } from '@/components/global/section-heading'
 
-interface TeamSeasonGpPageProps {
-  params: Promise<{
-    rivalrySlug: string
-  }>
+function Loading() {
+  return (
+    <div className='p-4 text-center'>
+      <p>Loading rivalry data...</p>
+    </div>
+  )
+}
+
+interface RivalryStatsProps {
+  rivalry: any
+}
+
+async function RivalryStats({ rivalry }: RivalryStatsProps) {
+  const result = await getLegendaryRivalryOverallResults(rivalry)
+
+  if (!result) {
+    return (
+      <div className='p-4 text-center'>
+        <p>No data available for this rivalry</p>
+        <p className='mt-2 text-sm text-gray-500'>
+          Please try again later or contact support if the issue persists.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='mt-16 flex flex-col gap-y-16'>
+      <div>
+        <SectionHeading>{`Overall Rivalry Stats`}</SectionHeading>
+        <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
+          <OverallDriverStats
+            driverNumber={1}
+            result={result}
+            color={rivalry.primaryColor}
+            driver={rivalry.drivers[0].code}
+          />
+          <OverallDriverStats
+            driverNumber={2}
+            result={result}
+            color={rivalry.secondaryColor}
+            driver={rivalry.drivers[1].code}
+          />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default async function LegendaryRivalryPage({
   params
-}: TeamSeasonGpPageProps) {
-  const { rivalrySlug } = await params
-
+}: {
+  params: { rivalrySlug: string }
+}) {
+  const { rivalrySlug } = params
   const rivalry = legendaryTeamRivals.find(r => r.slug === rivalrySlug)
 
-  if (!rivalry) {
-    return null
-  }
-
-  const result = await getLegendaryRivalryOverallResults(rivalry)
+  if (!rivalry) return null
 
   return (
     <MaxWidthWrapper>
@@ -59,25 +98,15 @@ export default async function LegendaryRivalryPage({
 
       <SeasonsNav seasons={rivalry.seasons} rivalry={rivalrySlug} />
 
-      <div className='mt-16 flex flex-col gap-y-16'>
-        <div>
-          <SectionHeading>{`Overall Rivalry Stats`}</SectionHeading>
-          <div className='mt-8 grid grid-cols-2 gap-x-4 sm:gap-x-8'>
-            <OverallDriverStats
-              driverNumber={1}
-              result={result}
-              color={rivalry.primaryColor}
-              driver={rivalry.drivers[0].code}
-            />
-            <OverallDriverStats
-              driverNumber={2}
-              result={result}
-              color={rivalry.secondaryColor}
-              driver={rivalry.drivers[1].code}
-            />
-          </div>
-        </div>
-      </div>
+      <Suspense fallback={<Loading />}>
+        <RivalryStats rivalry={rivalry} />
+      </Suspense>
     </MaxWidthWrapper>
   )
+}
+
+export async function generateStaticParams() {
+  return legendaryTeamRivals.map(rivalry => ({
+    rivalrySlug: rivalry.slug
+  }))
 }

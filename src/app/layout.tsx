@@ -32,6 +32,7 @@ const f1Regular = localFont({
   display: 'swap',
   variable: '--font-f1-regular'
 })
+
 const f1Wide = localFont({
   src: [
     {
@@ -57,7 +58,7 @@ export default async function RootLayout({
   children: ReactNode
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={cn(
           spaceGrotesk.variable,

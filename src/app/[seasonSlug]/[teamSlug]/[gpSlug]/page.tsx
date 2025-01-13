@@ -14,22 +14,25 @@ interface TeamSeasonGpPageProps {
   }>
 }
 
-export async function generateStaticParams({
-  params
-}: TeamSeasonGpPageProps): Promise<{ gpSlug: string }[]> {
-  const { seasonSlug } = await params
-
-  const data = await getSeasonRaces(seasonSlug)
-
-  if (!data) {
-    return []
+export async function generateStaticParams(): Promise<
+  { seasonSlug: string; teamSlug: string; gpSlug: string }[]
+> {
+  const params: { seasonSlug: string; teamSlug: string; gpSlug: string }[] = []
+  for (const season of seasons) {
+    for (const team of season.teams) {
+      const races = await getSeasonRaces(season.year.toString())
+      if (races?.seasonRaces) {
+        for (const race of races.seasonRaces) {
+          params.push({
+            seasonSlug: season.year.toString(),
+            teamSlug: team.slug,
+            gpSlug: race.Circuit.circuitId
+          })
+        }
+      }
+    }
   }
-
-  const { seasonRaces } = data
-
-  return seasonRaces.map(race => ({
-    gpSlug: race.slug
-  }))
+  return params
 }
 
 export default async function TeamSeasonGpPage({

@@ -20,6 +20,8 @@ export interface DriverStats {
   completedLaps: number
   lapCompletionPercentage: number
   podiumPercentage: number
+  finishedRaces: number
+  dnfRaces: number
 }
 
 export interface PositionChange {

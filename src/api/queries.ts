@@ -13,107 +13,221 @@ import {
 } from '@/api/types'
 import { SEASON_LAPS_2024 } from '@/api/constants'
 
-// Fetch season races data
-export const getSeasonRaces = async (seasonSlug: string) => {
-  try {
-    const seasonRacesData = await fetchErgastData(`/${seasonSlug}.json`)
-    if (!seasonRacesData?.RaceTable?.Races) {
-      console.error('Invalid race data structure:', seasonRacesData)
-      return undefined
-    }
-
-    return {
-      seasonRaces: seasonRacesData.RaceTable.Races,
-      totalSeasonRaces: seasonRacesData.total
-    }
-  } catch (error) {
-    console.error('Error fetching season races:', error)
-    return undefined
+// Add interfaces for API responses
+interface RaceResult {
+  grid: string
+  position: string
+  points: string
+  laps: string
+  status: string
+  Time?: { time: string }
+  FastestLap?: {
+    rank: string
+    Time: { time: string }
+  }
+  Driver: {
+    driverId: string
   }
 }
 
-// Fetch driver stats for a specific season
+interface Race {
+  raceName: string
+  Results: RaceResult[]
+}
+
+interface ErgastResponse {
+  MRData: {
+    xmlns: string
+    series: string
+    url: string
+    limit: string
+    offset: string
+    total: string
+    StandingsTable?: {
+      season: string
+      StandingsLists: Array<{
+        ConstructorStandings?: ConstructorStanding[]
+        DriverStandings?: DriverStanding[]
+      }>
+    }
+    RaceTable?: {
+      season: string
+      Races: Race[]
+    }
+    StatusTable?: {
+      Status: any[]
+    }
+  }
+}
+
+interface RaceData {
+  RaceTable: {
+    Races: Race[]
+    total?: string
+  }
+}
+
+interface DriverStanding {
+  Driver: {
+    driverId: string
+    givenName: string
+    familyName: string
+  }
+  points: string
+  position: string
+  wins: string
+}
+
+interface StandingsData {
+  StandingsTable: {
+    StandingsLists: Array<{
+      DriverStandings: DriverStanding[]
+    }>
+  }
+}
+
+interface StatusData {
+  StatusTable: {
+    Status: any[]
+  }
+}
+
+interface ConstructorStanding {
+  Constructor: {
+    name: string
+    constructorId: string
+    nationality: string
+  }
+  position: string
+  points: string
+  wins: string
+}
+
+interface ConstructorData {
+  StandingsTable: {
+    StandingsLists: Array<{
+      ConstructorStandings: ConstructorStanding[]
+    }>
+  }
+}
+
+// Helper function to safely access nested properties
+const safeGet = <T, K extends keyof T>(
+  obj: T | undefined,
+  key: K
+): T[K] | undefined => (obj ? obj[key] : undefined)
+
+// Fetch season races data with better typing
+export const getSeasonRaces = async (seasonSlug: string) => {
+  const response = await fetchErgastData<ErgastResponse>(`/${seasonSlug}.json`)
+
+  if (!response?.MRData?.RaceTable?.Races) {
+    return undefined
+  }
+
+  return {
+    seasonRaces: response.MRData.RaceTable.Races,
+    totalSeasonRaces: response.MRData.total
+  }
+}
+
+// Helper function to find driver result
+const findDriverResult = (race: Race, driverId: string) =>
+  race.Results?.find(r => r.Driver.driverId === driverId)
+
+// Helper function to calculate race stats
+const calculateRaceStats = (races: Race[], driverId: string) => {
+  const poles = races.filter(
+    race => findDriverResult(race, driverId)?.grid === '1'
+  )
+  const winsFromPole = poles.filter(
+    race => findDriverResult(race, driverId)?.position === '1'
+  )
+
+  const podiums = races.filter(race => {
+    const result = findDriverResult(race, driverId)
+    return result?.position && parseInt(result.position) <= 3
+  }).length
+
+  const completedLaps = races.reduce((sum, race) => {
+    const result = findDriverResult(race, driverId)
+    return sum + parseInt(result?.laps || '0')
+  }, 0)
+
+  return {
+    poles: poles.length,
+    winsFromPole: winsFromPole.length,
+    podiums,
+    completedLaps,
+    poleToWinRatio:
+      poles.length > 0
+        ? Number(((winsFromPole.length / poles.length) * 100).toFixed(2))
+        : 0,
+    podiumPercentage:
+      races.length > 0 ? Number(((podiums / races.length) * 100).toFixed(2)) : 0
+  }
+}
+
+// Fetch driver stats with better error handling and typing
 const getDriverStats = async (
   seasonSlug: string,
   driverId: string
 ): Promise<DriverStats | undefined> => {
-  console.log(
-    `Fetching stats for Driver ID: ${driverId} in Season: ${seasonSlug}`
-  )
-
   try {
     const [seasonData, raceData, statusData] = await Promise.all([
-      fetchErgastData(`/${seasonSlug}/driverStandings.json`),
-      fetchErgastData(`/${seasonSlug}/drivers/${driverId}/results.json`),
-      fetchErgastData(`/${seasonSlug}/drivers/${driverId}/status.json`)
+      fetchErgastData<ErgastResponse>(`/${seasonSlug}/driverStandings.json`),
+      fetchErgastData<ErgastResponse>(
+        `/${seasonSlug}/drivers/${driverId}/results.json`
+      ),
+      fetchErgastData<ErgastResponse>(
+        `/${seasonSlug}/drivers/${driverId}/status.json`
+      )
     ])
 
-    if (!seasonData || !raceData || !statusData) {
-      console.error(`Missing data for Driver ID: ${driverId}`, {
-        seasonData,
-        raceData,
-        statusData
-      })
+    if (!raceData?.MRData?.RaceTable?.Races) {
+      console.error('No race data found for driver:', driverId)
       return undefined
     }
 
+    const races = raceData.MRData.RaceTable.Races
     const raceCompletion = calculateRaceCompletion(statusData)
-    const points =
-      seasonData.StandingsTable.StandingsLists[0].DriverStandings.find(
-        (driver: any) => driver.Driver.driverId === driverId
-      )
-
-    const basicStats = calculateDriverStats(raceData, points)
-    const races = raceData.RaceTable.Races
-
-    const poles = races.filter((race: any) => race.Results?.[0]?.grid === '1')
-    const winsFromPole = races.filter(
-      (race: any) =>
-        race.Results?.[0]?.grid === '1' && race.Results?.[0]?.position === '1'
+    const driverStandings =
+      seasonData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings
+    const points = driverStandings?.find(
+      driver => driver.Driver.driverId === driverId
     )
 
-    const podiums = races.filter((race: any) => {
-      const driverResult = race.Results?.find(
-        (r: any) => r.Driver.driverId === driverId
-      )
-      return driverResult?.position && parseInt(driverResult.position) <= 3
-    }).length
-
-    const completedLaps = races.reduce((sum: number, race: any) => {
-      const driverResult = race.Results?.find(
-        (r: any) => r.Driver.driverId === driverId
-      )
-      return sum + parseInt(driverResult?.laps || 0)
-    }, 0)
+    const basicStats = calculateDriverStats(raceData, points)
+    const raceStats = calculateRaceStats(races, driverId)
 
     return {
-      poles: poles.length,
-      winsFromPole: winsFromPole.length,
-      poleToWinRatio:
-        poles.length > 0
-          ? Number(((winsFromPole.length / poles.length) * 100).toFixed(2))
-          : 0,
+      poles: raceStats.poles,
+      podiums: raceStats.podiums,
+      completedLaps: raceStats.completedLaps,
+      poleToWinRatio: raceStats.poleToWinRatio,
+      podiumPercentage: raceStats.podiumPercentage,
       points,
-      status: statusData.StatusTable.Status,
+      status: statusData?.MRData?.StatusTable?.Status ?? [],
       races,
-      ...basicStats,
+      fastestLaps: basicStats.fastestLaps ?? 0,
+      positionChanges: basicStats.positionChanges ?? [],
+      totalPositionsGained: basicStats.totalPositionsGained ?? 0,
+      lapsCompleted: basicStats.lapsCompleted ?? 0,
+      totalRaces: basicStats.totalRaces ?? 0,
+      pointsPerRace: basicStats.pointsPerRace ?? 0,
       finishedRaces: raceCompletion.finishedRaces,
       dnfRaces: raceCompletion.dnfRaces,
-      completedLaps,
       lapCompletionPercentage:
         SEASON_LAPS_2024 > 0
-          ? Number(((completedLaps / SEASON_LAPS_2024) * 100).toFixed(2))
-          : 0,
-      podiums,
-      podiumPercentage:
-        races.length > 0
-          ? Number(((podiums / races.length) * 100).toFixed(2))
+          ? Number(
+              ((raceStats.completedLaps / SEASON_LAPS_2024) * 100).toFixed(2)
+            )
           : 0,
       gridAverage: Number(calculateAveragePosition(races, 'gridAverage')),
       raceAverage: Number(calculateAveragePosition(races, 'raceAverage'))
-    } as DriverStats
+    }
   } catch (error) {
-    console.error(`Error fetching stats for Driver ID: ${driverId}`, error)
+    console.error('Error in getDriverStats:', error)
     return undefined
   }
 }
@@ -128,72 +242,74 @@ export const getDriversSeasonStats = async ({
   driverOne: string
   driverTwo: string
 }): Promise<DriversSeasonStats | undefined> => {
-  const [driverOneStats, driverTwoStats] = await Promise.all([
-    getDriverStats(season, driverOne),
-    getDriverStats(season, driverTwo)
-  ])
+  try {
+    const [driverOneStats, driverTwoStats] = await Promise.all([
+      getDriverStats(season, driverOne),
+      getDriverStats(season, driverTwo)
+    ])
 
-  if (!driverOneStats) {
-    console.warn(`Driver One Stats not found for: ${driverOne}`)
-  }
-  if (!driverTwoStats) {
-    console.warn(`Driver Two Stats not found for: ${driverTwo}`)
-  }
+    if (!driverOneStats || !driverTwoStats) {
+      console.error('Missing driver stats:', {
+        driverOneStats: !!driverOneStats,
+        driverTwoStats: !!driverTwoStats
+      })
+      return undefined
+    }
 
-  if (!driverOneStats || !driverTwoStats) {
+    const raceComparison = comparePositions(
+      driverOneStats.races,
+      driverTwoStats.races,
+      'race'
+    )
+    const gridComparison = comparePositions(
+      driverOneStats.races,
+      driverTwoStats.races,
+      'grid'
+    )
+
+    return {
+      driverOneGridAverage: driverOneStats.gridAverage,
+      driverOneRaceAverage: driverOneStats.raceAverage,
+      driverTwoGridAverage: driverTwoStats.gridAverage,
+      driverTwoRaceAverage: driverTwoStats.raceAverage,
+      driverOnePoints: driverOneStats.points?.points ?? '0',
+      driverTwoPoints: driverTwoStats.points?.points ?? '0',
+      driverOnePosition: driverOneStats.points?.position ?? '',
+      driverTwoPosition: driverTwoStats.points?.position ?? '',
+      driverOneWins: driverOneStats.points?.wins ?? '0',
+      driverTwoWins: driverTwoStats.points?.wins ?? '0',
+      driverOnePoles: driverOneStats.poles,
+      driverTwoPoles: driverTwoStats.poles,
+      driverOnePodiumPercentage: driverOneStats.podiumPercentage,
+      driverTwoPodiumPercentage: driverTwoStats.podiumPercentage,
+      driverOneBetterFinishes: raceComparison.driver1Better,
+      driverTwoBetterFinishes: raceComparison.driver2Better,
+      driverOneBetterGrid: gridComparison.driver1Better,
+      driverTwoBetterGrid: gridComparison.driver2Better,
+      driverOneStatus: driverOneStats.status,
+      driverTwoStatus: driverTwoStats.status,
+      driverOnePositionChanges: driverOneStats.positionChanges,
+      driverTwoPositionChanges: driverTwoStats.positionChanges,
+      driverOneTotalPositionsGained: driverOneStats.totalPositionsGained,
+      driverTwoTotalPositionsGained: driverTwoStats.totalPositionsGained,
+      driverOneFastestLaps: driverOneStats.fastestLaps,
+      driverTwoFastestLaps: driverTwoStats.fastestLaps,
+      driverOnePodiums: driverOneStats.podiums,
+      driverTwoPodiums: driverTwoStats.podiums,
+      driverOnePoleToWinRatio: driverOneStats.poleToWinRatio,
+      driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio,
+      driverOneTotalRaces: driverOneStats.totalRaces,
+      driverTwoTotalRaces: driverTwoStats.totalRaces,
+      driverOnePointsPerRace: driverOneStats.pointsPerRace,
+      driverTwoPointsPerRace: driverTwoStats.pointsPerRace,
+      driverOneCompletedLaps: driverOneStats.completedLaps,
+      driverTwoCompletedLaps: driverTwoStats.completedLaps,
+      driverOneLapCompletion: driverOneStats.lapCompletionPercentage,
+      driverTwoLapCompletion: driverTwoStats.lapCompletionPercentage
+    }
+  } catch (error) {
+    console.error('Error in getDriversSeasonStats:', error)
     return undefined
-  }
-
-  const raceComparison = comparePositions(
-    driverOneStats.races,
-    driverTwoStats.races,
-    'race'
-  )
-  const gridComparison = comparePositions(
-    driverOneStats.races,
-    driverTwoStats.races,
-    'grid'
-  )
-
-  return {
-    driverOneGridAverage: driverOneStats.gridAverage,
-    driverOneRaceAverage: driverOneStats.raceAverage,
-    driverTwoGridAverage: driverTwoStats.gridAverage,
-    driverTwoRaceAverage: driverTwoStats.raceAverage,
-    driverOnePoints: driverOneStats.points?.points ?? '0',
-    driverTwoPoints: driverTwoStats.points?.points ?? '0',
-    driverOnePosition: driverOneStats.points?.position ?? '',
-    driverTwoPosition: driverTwoStats.points?.position ?? '',
-    driverOneWins: driverOneStats.points?.wins ?? '0',
-    driverTwoWins: driverTwoStats.points?.wins ?? '0',
-    driverOnePoles: driverOneStats.poles,
-    driverTwoPoles: driverTwoStats.poles,
-    driverOnePodiumPercentage: driverOneStats.podiumPercentage,
-    driverTwoPodiumPercentage: driverTwoStats.podiumPercentage,
-    driverOneBetterFinishes: raceComparison.driver1Better,
-    driverTwoBetterFinishes: raceComparison.driver2Better,
-    driverOneBetterGrid: gridComparison.driver1Better,
-    driverTwoBetterGrid: gridComparison.driver2Better,
-    driverOneStatus: driverOneStats.status,
-    driverTwoStatus: driverTwoStats.status,
-    driverOnePositionChanges: driverOneStats.positionChanges,
-    driverTwoPositionChanges: driverTwoStats.positionChanges,
-    driverOneTotalPositionsGained: driverOneStats.totalPositionsGained,
-    driverTwoTotalPositionsGained: driverTwoStats.totalPositionsGained,
-    driverOneFastestLaps: driverOneStats.fastestLaps,
-    driverTwoFastestLaps: driverTwoStats.fastestLaps,
-    driverOnePodiums: driverOneStats.podiums,
-    driverTwoPodiums: driverTwoStats.podiums,
-    driverOnePoleToWinRatio: driverOneStats.poleToWinRatio,
-    driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio,
-    driverOneTotalRaces: driverOneStats.totalRaces,
-    driverTwoTotalRaces: driverTwoStats.totalRaces,
-    driverOnePointsPerRace: driverOneStats.pointsPerRace,
-    driverTwoPointsPerRace: driverTwoStats.pointsPerRace,
-    driverOneCompletedLaps: driverOneStats.completedLaps,
-    driverTwoCompletedLaps: driverTwoStats.completedLaps,
-    driverOneLapCompletion: driverOneStats.lapCompletionPercentage,
-    driverTwoLapCompletion: driverTwoStats.lapCompletionPercentage
   }
 }
 
@@ -204,15 +320,15 @@ const getDriverRaceResult = async (
   driver: string
 ) => {
   try {
-    const data = await fetchErgastData(
+    const data = await fetchErgastData<ErgastResponse>(
       `/${season}/circuits/${circuit}/drivers/${driver}/results.json`
     )
-    if (!data) return undefined
+    if (!data?.MRData?.RaceTable?.Races?.[0]) return undefined
 
-    const race = data.RaceTable.Races[0]
+    const race = data.MRData.RaceTable.Races[0]
     return {
-      raceName: race?.raceName,
-      result: race?.Results[0]
+      raceName: race.raceName,
+      result: race.Results[0]
     }
   } catch (error) {
     console.error('Error fetching driver race result:', error)
@@ -266,10 +382,15 @@ export const getDriversRaceStats = async ({
 
 // Fetch the season champion for a specific season
 export const getSeasonChampion = async (season: string) => {
-  const data = await fetchErgastData(`/${season}/driverStandings/1.json`)
-  if (!data) return undefined
+  const data = await fetchErgastData<ErgastResponse>(
+    `/${season}/driverStandings/1.json`
+  )
+  if (!data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings?.[0])
+    return undefined
 
-  const champion = data.StandingsTable.StandingsLists[0].DriverStandings[0]
+  const champion =
+    data.MRData.StandingsTable.StandingsLists[0].DriverStandings[0]
+
   return {
     driverName: `${champion.Driver.givenName} ${champion.Driver.familyName}`,
     points: Number(champion.points),
@@ -286,33 +407,45 @@ export const getConstructorStandings = async ({
   season: string
   constructorId: string
 }) => {
-  const data = await fetchErgastData(
-    `/${season}/constructors/${constructorId}/constructorStandings.json`
+  const data = await fetchErgastData<ErgastResponse>(
+    `/${season}/constructorStandings.json`
   )
-  if (!data) return undefined
 
-  const standings =
-    data.StandingsTable.StandingsLists[0]?.ConstructorStandings[0]
-  if (!standings) return undefined
+  if (
+    !data?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings
+  ) {
+    return undefined
+  }
+
+  const standing =
+    data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings.find(
+      constructor => constructor.Constructor.constructorId === constructorId
+    )
+
+  if (!standing) return undefined
 
   return {
-    position: Number(standings.position),
-    points: Number(standings.points),
-    wins: Number(standings.wins),
-    constructorName: standings.Constructor.name,
-    nationality: standings.Constructor.nationality
+    position: Number(standing.position),
+    points: Number(standing.points),
+    wins: Number(standing.wins),
+    constructorName: standing.Constructor.name,
+    nationality: standing.Constructor.nationality
   }
 }
 
 // Fetch season teams for a specific season
 export const getSeasonTeams = async (season: string) => {
-  const data = await fetchErgastData(`/${season}/constructorStandings.json`)
-  if (!data?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings) {
+  const data = (await fetchErgastData(
+    `/${season}/constructorStandings.json`
+  )) as ErgastResponse
+  if (
+    !data?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings
+  ) {
     return undefined
   }
 
-  return data.StandingsTable.StandingsLists[0].ConstructorStandings.map(
-    (constructor: any) => ({
+  return data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings.map(
+    constructor => ({
       name: constructor.Constructor.name,
       id: constructor.Constructor.constructorId,
       nationality: constructor.Constructor.nationality,

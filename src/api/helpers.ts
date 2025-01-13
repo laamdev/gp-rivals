@@ -46,76 +46,95 @@ export const calculateDriverStats = (
   raceData: any,
   points: any
 ): Partial<DriverStats> => {
-  const totalRaces = raceData.RaceTable.Races.length
+  if (!raceData?.MRData?.RaceTable?.Races) {
+    return {
+      fastestLaps: 0,
+      podiums: 0,
+      positionChanges: [],
+      totalPositionsGained: 0,
+      totalRaces: 0,
+      pointsPerRace: 0,
+      lapsCompleted: 0,
+      completedLaps: 0,
+      poles: 0,
+      poleToWinRatio: 0,
+      podiumPercentage: 0,
+      gridAverage: 0,
+      raceAverage: 0,
+      lapCompletionPercentage: 0,
+      races: []
+    }
+  }
 
-  const fastestLaps = raceData.RaceTable.Races.reduce(
+  const races = raceData.MRData.RaceTable.Races
+  const totalRaces = races.length
+
+  const fastestLaps = races.reduce(
     (count: number, race: any) =>
       count + (race.Results[0].FastestLap?.rank === '1' ? 1 : 0),
     0
   )
 
-  const podiums = raceData.RaceTable.Races.reduce(
+  const podiums = races.reduce(
     (count: number, race: any) =>
       count + (parseInt(race.Results[0].position) <= 3 ? 1 : 0),
     0
   )
 
-  const positionChanges: PositionChange[] = raceData.RaceTable.Races.map(
-    (race: any) => {
-      const country = race.Circuit.Location.country
-      const locality = race.Circuit.Location.locality
+  const poles = races.filter(race => race.Results[0].grid === '1').length
 
-      let displayName = country
+  const positionChanges: PositionChange[] = races.map((race: any) => {
+    const country = race.Circuit.Location.country
+    const locality = race.Circuit.Location.locality
 
+    let displayName = country
+
+    if (country === 'USA' || country === 'United States') {
+      displayName = `USA (${locality})`
+    }
+
+    if (country === 'Italy') {
+      displayName = `Italy (${locality})`
+    }
+
+    const countryData = countries.find(c => {
       if (country === 'USA' || country === 'United States') {
-        displayName = `USA (${locality})`
+        return c.name.startsWith('USA')
       }
 
       if (country === 'Italy') {
-        displayName = `Italy (${locality})`
+        return c.name.startsWith('Italy')
       }
+      return c.name === country
+    })
 
-      const countryData = countries.find(c => {
-        if (country === 'USA' || country === 'United States') {
-          return c.name.startsWith('USA')
-        }
+    const status = race.Results[0].status
+    const isDriverDNF = !FINISHED_STATUSES.includes(status)
 
-        if (country === 'Italy') {
-          return c.name.startsWith('Italy')
-        }
-        return c.name === country
-      })
-
-      const status = race.Results[0].status
-      console.log(`Race: ${race.raceName}, Status: ${status}`)
-      const isDriverDNF = !FINISHED_STATUSES.includes(status)
-
-      if (race.raceName.includes('British')) {
-        console.log({
-          status,
-          isDriverDNF,
-          FINISHED_STATUSES,
-          position: race.Results[0].position
-        })
-      }
-
-      return {
-        race: displayName,
-        flag: countryData?.flag || '🏁',
-        grid: parseInt(race.Results[0].grid),
-        finish: isDriverDNF ? 'DNF' : parseInt(race.Results[0].position),
-        placesGained: isDriverDNF
-          ? null
-          : parseInt(race.Results[0].grid) - parseInt(race.Results[0].position),
-        status
-      }
+    return {
+      race: displayName,
+      flag: countryData?.flag || '🏁',
+      grid: parseInt(race.Results[0].grid),
+      finish: isDriverDNF ? 'DNF' : parseInt(race.Results[0].position),
+      placesGained: isDriverDNF
+        ? null
+        : parseInt(race.Results[0].grid) - parseInt(race.Results[0].position),
+      status
     }
-  )
+  })
 
   const totalPositionsGained = positionChanges.reduce(
     (sum, change) => sum + (change.placesGained ?? 0),
     0
   )
+
+  const completedLaps = races.reduce(
+    (sum, race) => sum + parseInt(race.Results[0].laps || '0'),
+    0
+  )
+
+  const gridAverage = Number(calculateAveragePosition(races, 'gridAverage'))
+  const raceAverage = Number(calculateAveragePosition(races, 'raceAverage'))
 
   return {
     fastestLaps,
@@ -125,14 +144,36 @@ export const calculateDriverStats = (
     totalRaces,
     pointsPerRace: points
       ? Number((parseInt(points.points) / totalRaces).toFixed(2))
-      : 0
+      : 0,
+    lapsCompleted: completedLaps,
+    completedLaps,
+    poles,
+    poleToWinRatio:
+      poles > 0
+        ? Number(
+            (
+              (races.filter(
+                race =>
+                  race.Results[0].grid === '1' &&
+                  race.Results[0].position === '1'
+              ).length /
+                poles) *
+              100
+            ).toFixed(2)
+          )
+        : 0,
+    podiumPercentage:
+      totalRaces > 0 ? Number(((podiums / totalRaces) * 100).toFixed(2)) : 0,
+    gridAverage,
+    raceAverage,
+    races
   }
 }
 
 export const isDNF = (status: string) => !FINISHED_STATUSES.includes(status)
 
 export const calculateRaceCompletion = (statusData: any) => {
-  return statusData?.StatusTable.Status.reduce(
+  return statusData.MRData.StatusTable.Status.reduce(
     (acc: { finishedRaces: number; dnfRaces: number }, status: any) => {
       const count = Number(status.count)
       if (FINISHED_STATUSES.includes(status.status)) {
