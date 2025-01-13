@@ -43,6 +43,7 @@ export const HeadToHeadRadial = ({
 
   const chartData = [
     {
+      id: `${competition}-comparison`,
       competition: competition,
       driverOne: driverOneValue,
       driverTwo: driverTwoValue
@@ -59,6 +60,7 @@ export const HeadToHeadRadial = ({
       </CardHeader>
       <CardContent className='flex flex-1 items-center pb-0'>
         <ChartContainer
+          key={`${competition}-${driverOne}-${driverTwo}`}
           config={chartConfig}
           className='mx-auto aspect-square w-full max-w-[250px]'
         >
@@ -99,6 +101,7 @@ export const HeadToHeadRadial = ({
               />
             </PolarRadiusAxis>
             <RadialBar
+              key={`${driverOne}-bar`}
               dataKey='driverOne'
               stackId='a'
               cornerRadius={5}
@@ -106,6 +109,7 @@ export const HeadToHeadRadial = ({
               className='stroke-transparent stroke-2'
             />
             <RadialBar
+              key={`${driverTwo}-bar`}
               dataKey='driverTwo'
               fill={secondaryColor}
               stackId='a'

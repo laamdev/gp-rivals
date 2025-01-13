@@ -8,16 +8,22 @@ import { cn } from '@/lib/utils'
 import { getLegendaryRivalryOverallResults } from '@/api/queries'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
 
-function Loading() {
+interface RivalryStatsProps {
+  rivalry: any
+}
+
+interface LegendaryRivalryPageProps {
+  params: Promise<{
+    rivalrySlug: string
+  }>
+}
+
+const Loading = () => {
   return (
     <div className='p-4 text-center'>
       <p>Loading rivalry data...</p>
     </div>
   )
-}
-
-interface RivalryStatsProps {
-  rivalry: any
 }
 
 async function RivalryStats({ rivalry }: RivalryStatsProps) {
@@ -59,10 +65,8 @@ async function RivalryStats({ rivalry }: RivalryStatsProps) {
 
 export default async function LegendaryRivalryPage({
   params
-}: {
-  params: { rivalrySlug: string }
-}) {
-  const { rivalrySlug } = params
+}: LegendaryRivalryPageProps) {
+  const { rivalrySlug } = await params
   const rivalry = legendaryTeamRivals.find(r => r.slug === rivalrySlug)
 
   if (!rivalry) return null

@@ -1,41 +1,103 @@
+// API Response Types
+export interface ErgastResponse {
+  MRData: {
+    total: string
+    RaceTable?: {
+      Races: Race[]
+    }
+    StandingsTable?: {
+      StandingsLists: Array<{
+        ConstructorStandings?: Constructor[]
+        DriverStandings?: Driver[]
+      }>
+    }
+    StatusTable?: {
+      Status: StatusEntry[]
+    }
+  }
+}
+
+export interface Race {
+  raceName: string
+  date: string
+  Circuit: {
+    circuitId: string
+  }
+  Results: RaceResult[]
+}
+
+export interface RaceResult {
+  grid: string
+  position: string
+  points: string
+  laps: string
+  status: string
+  Time?: { time: string }
+  FastestLap?: {
+    rank: string
+    Time: { time: string }
+  }
+  Driver: {
+    driverId: string
+  }
+}
+
+export interface Constructor {
+  Constructor: {
+    name: string
+    constructorId: string
+    nationality: string
+  }
+  position: string
+  points: string
+  wins: string
+}
+
+export interface Driver {
+  Driver: {
+    driverId: string
+    givenName: string
+    familyName: string
+  }
+  points: string
+  position: string
+  wins: string
+}
+
+export interface StatusEntry {
+  count: string
+  status: string
+}
+
+// Stats Types
 export interface DriverStats {
   poles: number
-  gridAverage: number
-  raceAverage: number
-  points?: {
-    points: string
-    position: string
-    wins: string
-  }
-  status: any
-  races: any[]
-  fastestLaps: number
   podiums: number
+  completedLaps: number
+  poleToWinRatio: number
+  podiumPercentage: number
+  points: Driver | undefined
+  status: StatusEntry[]
+  races: Race[]
+  fastestLaps: number
   positionChanges: PositionChange[]
   totalPositionsGained: number
-  poleToWinRatio: number
   lapsCompleted: number
   totalRaces: number
   pointsPerRace: number
-  completedLaps: number
-  lapCompletionPercentage: number
-  podiumPercentage: number
   finishedRaces: number
   dnfRaces: number
+  lapCompletionPercentage: number
+  gridAverage: number
+  raceAverage: number
 }
 
 export interface PositionChange {
   race: string
-  flag: string
   grid: number
   finish: number
   placesGained: number
   status: string
-}
-
-export interface ComparisonResult {
-  driver1Better: number
-  driver2Better: number
 }
 
 export interface DriversSeasonStats {
@@ -55,8 +117,8 @@ export interface DriversSeasonStats {
   driverTwoBetterFinishes: number
   driverOneBetterGrid: number
   driverTwoBetterGrid: number
-  driverOneStatus: any
-  driverTwoStatus: any
+  driverOneStatus: StatusEntry[]
+  driverTwoStatus: StatusEntry[]
   driverOnePositionChanges: PositionChange[]
   driverTwoPositionChanges: PositionChange[]
   driverOneTotalPositionsGained: number
@@ -77,83 +139,4 @@ export interface DriversSeasonStats {
   driverTwoLapCompletion: number
   driverOnePodiumPercentage: number
   driverTwoPodiumPercentage: number
-}
-
-export interface LegendaryRivalry {
-  id: number
-  slug: string
-  team: string
-  seasons: Array<{ year: number }>
-  primaryColor: string
-  secondaryColor: string
-  drivers: Array<{
-    id: number
-    firstName: string
-    lastName: string
-    code: string
-    pictureUrl: string
-    slug: string
-  }>
-}
-
-export interface LegendaryRivalryStats {
-  driverOne: {
-    points: number
-    wins: number
-    gridFirst: number
-    podiums: number
-    fastestLaps: number
-    positions: number[]
-    gridPositions: number[]
-    qualifyingPositions: number[]
-    championships: number
-    averagePosition: number
-    averageGridPosition: number
-    averageQualifyingPosition: number | null
-    pointsPerRace: number
-    poleToWinRatio: number
-    dnfs: number
-    racesFinished: number
-    gridFirsts: number
-  }
-  driverTwo: {
-    points: number
-    wins: number
-    gridFirst: number
-    podiums: number
-    fastestLaps: number
-    positions: number[]
-    gridPositions: number[]
-    qualifyingPositions: number[]
-    championships: number
-    averagePosition: number
-    averageGridPosition: number
-    averageQualifyingPosition: number | null
-    pointsPerRace: number
-    poleToWinRatio: number
-    dnfs: number
-    racesFinished: number
-    gridFirsts: number
-  }
-}
-
-interface StatComparison {
-  d1: number
-  d2: number
-  higherIsBetter: boolean
-}
-
-export interface LegendaryComparison {
-  points: StatComparison
-  wins: StatComparison
-  gridFirst: StatComparison
-  podiums: StatComparison
-  fastestLaps: StatComparison
-  averagePosition: StatComparison
-  averageGridPosition: StatComparison
-  averageQualifyingPosition: StatComparison
-  pointsPerRace: StatComparison
-  poleToWinRatio: StatComparison
-  championships: StatComparison
-  dnfs: StatComparison
 }

@@ -173,7 +173,11 @@ export const calculateDriverStats = (
 export const isDNF = (status: string) => !FINISHED_STATUSES.includes(status)
 
 export const calculateRaceCompletion = (statusData: any) => {
-  return statusData.MRData.StatusTable.Status.reduce(
+  if (!statusData?.StatusTable?.Status) {
+    return { finishedRaces: 0, dnfRaces: 0 }
+  }
+
+  return statusData.StatusTable.Status.reduce(
     (acc: { finishedRaces: number; dnfRaces: number }, status: any) => {
       const count = Number(status.count)
       if (FINISHED_STATUSES.includes(status.status)) {

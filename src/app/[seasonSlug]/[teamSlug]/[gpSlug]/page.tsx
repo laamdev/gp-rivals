@@ -5,6 +5,7 @@ import { DriverStats } from '@/components/global/driver-stats'
 
 import { seasons } from '@/data/seasons'
 import { getDriversRaceStats, getSeasonRaces } from '@/api/queries'
+import { Race } from '@/api/types'
 
 interface TeamSeasonGpPageProps {
   params: Promise<{
@@ -22,7 +23,7 @@ export async function generateStaticParams(): Promise<
     for (const team of season.teams) {
       const races = await getSeasonRaces(season.year.toString())
       if (races?.seasonRaces) {
-        for (const race of races.seasonRaces) {
+        for (const race of races.seasonRaces as Race[]) {
           params.push({
             seasonSlug: season.year.toString(),
             teamSlug: team.slug,
@@ -85,11 +86,7 @@ export default async function TeamSeasonGpPage({
           season={seasonSlug}
           raceName={result.raceName}
         />
-        <SeasonRacesNav
-          seasonRaces={seasonRaces}
-          teamSlug={teamSlug}
-          seasonSlug={seasonSlug}
-        />
+        <SeasonRacesNav teamSlug={teamSlug} seasonSlug={seasonSlug} />
       </section>
 
       <div className='mt-16 flex flex-col gap-y-16'>

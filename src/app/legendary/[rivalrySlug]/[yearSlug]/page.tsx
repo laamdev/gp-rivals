@@ -1,13 +1,23 @@
 import { Suspense } from 'react'
 import Image from 'next/image'
+
 import { MaxWidthWrapper } from '@/components/global/max-width-wrapper'
 import { DriverStats } from '@/components/global/driver-stats'
 import { SeasonsNav } from '@/components/legendary-team-rivals/seasons-nav'
+
 import { getLegendaryRivalrySeasonStats } from '@/api/queries'
 import { legendaryTeamRivals } from '@/data/legendary-team-rivals'
 import { cn } from '@/lib/utils'
 
-function Loading() {
+interface SeasonStatsProps {
+  rivalry: (typeof legendaryTeamRivals)[0]
+  yearSlug: string
+}
+interface LegendaryRivalrySeasonPageProps {
+  params: Promise<{ rivalrySlug: string; yearSlug: string }>
+}
+
+const Loading = () => {
   return (
     <div className='p-4 text-center'>
       <p>Loading season data...</p>
@@ -15,12 +25,7 @@ function Loading() {
   )
 }
 
-interface SeasonStatsProps {
-  rivalry: any
-  yearSlug: string
-}
-
-async function SeasonStats({ rivalry, yearSlug }: SeasonStatsProps) {
+const SeasonStats = async ({ rivalry, yearSlug }: SeasonStatsProps) => {
   const result = await getLegendaryRivalrySeasonStats({
     driverOne: rivalry.drivers[0].slug,
     driverTwo: rivalry.drivers[1].slug,
@@ -63,10 +68,8 @@ async function SeasonStats({ rivalry, yearSlug }: SeasonStatsProps) {
 
 export default async function LegendaryRivalrySeasonPage({
   params
-}: {
-  params: { rivalrySlug: string; yearSlug: string }
-}) {
-  const { rivalrySlug, yearSlug } = params
+}: LegendaryRivalrySeasonPageProps) {
+  const { rivalrySlug, yearSlug } = await params
   const rivalry = legendaryTeamRivals.find(r => r.slug === rivalrySlug)
 
   if (!rivalry) return null
@@ -111,17 +114,11 @@ export default async function LegendaryRivalrySeasonPage({
   )
 }
 
-export async function generateStaticParams(): Promise<
-  { rivalrySlug: string; yearSlug: string }[]
-> {
-  const params: { rivalrySlug: string; yearSlug: string }[] = []
-  for (const rivalry of legendaryTeamRivals) {
-    for (const season of rivalry.seasons) {
-      params.push({
-        rivalrySlug: rivalry.slug,
-        yearSlug: season.year.toString()
-      })
-    }
-  }
-  return params
+export async function generateStaticParams() {
+  return legendaryTeamRivals.flatMap(rivalry =>
+    rivalry.seasons.map(season => ({
+      rivalrySlug: rivalry.slug,
+      yearSlug: season.year.toString()
+    }))
+  )
 }
