@@ -12,8 +12,9 @@ export const SeasonRacesNav = async ({
   teamSlug,
   seasonSlug
 }: SeasonRacesNavProps) => {
-  const racesResult = await getSeasonRaces(seasonSlug)
-  if (!racesResult) return null
+  const races = await getSeasonRaces(seasonSlug)
+
+  if (!races) return null
 
   return (
     <section className='flex gap-x-4 overflow-x-auto py-8'>
@@ -21,15 +22,15 @@ export const SeasonRacesNav = async ({
         Full Season
       </NavLink>
 
-      {racesResult.seasonRaces.map((race, idx) => {
+      {races.seasonRaces.map((race, idx) => {
         const raceDate = new Date(race.date)
         const isFutureRace = raceDate > currentDate
 
         return (
           <NavLink
             key={idx}
-            href={`/${seasonSlug}/${teamSlug}/${race.Circuit.circuitId}`}
-            activeFilter={race.Circuit.circuitId}
+            href={`/${seasonSlug}/${teamSlug}/${race.round}`}
+            activeFilter={race.round}
             disabled={isFutureRace}
           >
             {race.raceName}

@@ -20,6 +20,7 @@ export interface ErgastResponse {
 export interface Race {
   raceName: string
   date: string
+  round: string
   Circuit: {
     circuitId: string
   }
@@ -35,7 +36,12 @@ export interface RaceResult {
   Time?: { time: string }
   FastestLap?: {
     rank: string
+    lap: string
     Time: { time: string }
+    AverageSpeed: {
+      units: string
+      speed: string
+    }
   }
   Driver: {
     driverId: string

@@ -432,3 +432,25 @@ export const getLegendaryRivalryOverallResults = async (rivalry: {
 
   return stats
 }
+
+// Fetch team race result
+export const getTeamRaceResult = async ({
+  season,
+  round,
+  team
+}: {
+  season: string
+  round: string
+  team: string
+}) => {
+  const data = await fetchErgastData<ErgastResponse>(
+    `/${season}/${round}/constructors/${team}/results.json`
+  )
+  if (!data?.MRData?.RaceTable?.Races?.[0]) return undefined
+
+  const race = data.MRData.RaceTable.Races[0]
+  return {
+    raceName: race.raceName,
+    results: race.Results
+  }
+}
