@@ -177,6 +177,8 @@ export interface DriversSeasonStats {
   driverTwoPositionChanges: number[]
   driverTwoTotalPositionsGained: number
   driverTwoResults: Race[]
+
+  championshipLeaderPoints: string
 }
 
 export interface DriverStanding {

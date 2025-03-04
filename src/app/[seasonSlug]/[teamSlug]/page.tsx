@@ -16,9 +16,9 @@ interface TeamSeasonPageProps {
     seasonSlug: string
     teamSlug: string
   }>
-  searchParams: {
+  searchParams: Promise<{
     gp?: string
-  }
+  }>
 }
 
 interface RaceResult {

@@ -185,20 +185,20 @@ const mapDriverToSeasonStats = (
     [`${prefix}Position`]: stats.points.position,
     [`${prefix}Wins`]: Number(stats.points.wins),
     [`${prefix}Poles`]: stats.poles,
+    [`${prefix}Podiums`]: stats.podiums,
+    [`${prefix}FastestLaps`]: stats.fastestLaps,
+    [`${prefix}CompletedLaps`]: stats.completedLaps,
     [`${prefix}PodiumPercentage`]: stats.podiumPercentage,
-    [`${prefix}Status`]: stats.status,
+    [`${prefix}PoleToWinRatio`]: stats.poleToWinRatio,
+    [`${prefix}PointsPerRace`]: stats.pointsPerRace,
+    [`${prefix}TotalRaces`]: stats.totalRaces,
     [`${prefix}PositionChanges`]: stats.positionChanges.map(
       change => change.placesGained
     ),
     [`${prefix}TotalPositionsGained`]: stats.totalPositionsGained,
-    [`${prefix}FastestLaps`]: stats.fastestLaps,
-    [`${prefix}Podiums`]: stats.podiums,
-    [`${prefix}PoleToWinRatio`]: stats.poleToWinRatio,
-    [`${prefix}TotalRaces`]: stats.totalRaces,
-    [`${prefix}PointsPerRace`]: stats.pointsPerRace,
-    [`${prefix}CompletedLaps`]: stats.completedLaps,
-    [`${prefix}LapCompletion`]: stats.lapCompletionPercentage,
-    [`${prefix}Results`]: stats.races
+    [`${prefix}Results`]: stats.races,
+    [`${prefix}BetterFinishes`]: 0,
+    [`${prefix}BetterGrid`]: 0
   }
 }
 
@@ -275,13 +275,7 @@ export const getDriversSeasonStats = async ({
     'driverTwo'
   )
 
-  return {
-    ...driverOneSeasonStats,
-    ...driverTwoSeasonStats,
-    driverOneBetterFinishes: raceComparison.driver1Better,
-    driverTwoBetterFinishes: raceComparison.driver2Better,
-    driverOneBetterGrid: gridComparison.driver1Better,
-    driverTwoBetterGrid: gridComparison.driver2Better,
+  const seasonStats: DriversSeasonStats = {
     driverOnePosition:
       driverOneStanding?.position || finalDriverOneStats.points.position || '0',
     driverOnePoints:
@@ -289,6 +283,24 @@ export const getDriversSeasonStats = async ({
     driverOneWins: Number(
       driverOneStanding?.wins || finalDriverOneStats.points.wins || '0'
     ),
+    driverOnePoles: finalDriverOneStats.poles,
+    driverOnePodiums: finalDriverOneStats.podiums,
+    driverOneFastestLaps: finalDriverOneStats.fastestLaps,
+    driverOneBetterFinishes: raceComparison.driver1Better,
+    driverOneBetterGrid: gridComparison.driver1Better,
+    driverOneRaceAverage: finalDriverOneStats.raceAverage,
+    driverOneGridAverage: finalDriverOneStats.gridAverage,
+    driverOneCompletedLaps: finalDriverOneStats.completedLaps,
+    driverOnePodiumPercentage: finalDriverOneStats.podiumPercentage,
+    driverOnePoleToWinRatio: finalDriverOneStats.poleToWinRatio,
+    driverOnePointsPerRace: finalDriverOneStats.pointsPerRace,
+    driverOneTotalRaces: finalDriverOneStats.totalRaces,
+    driverOnePositionChanges: finalDriverOneStats.positionChanges.map(
+      change => change.placesGained
+    ),
+    driverOneTotalPositionsGained: finalDriverOneStats.totalPositionsGained,
+    driverOneResults: finalDriverOneStats.races,
+
     driverTwoPosition:
       driverTwoStanding?.position || finalDriverTwoStats.points.position || '0',
     driverTwoPoints:
@@ -296,8 +308,28 @@ export const getDriversSeasonStats = async ({
     driverTwoWins: Number(
       driverTwoStanding?.wins || finalDriverTwoStats.points.wins || '0'
     ),
+    driverTwoPoles: finalDriverTwoStats.poles,
+    driverTwoPodiums: finalDriverTwoStats.podiums,
+    driverTwoFastestLaps: finalDriverTwoStats.fastestLaps,
+    driverTwoBetterFinishes: raceComparison.driver2Better,
+    driverTwoBetterGrid: gridComparison.driver2Better,
+    driverTwoRaceAverage: finalDriverTwoStats.raceAverage,
+    driverTwoGridAverage: finalDriverTwoStats.gridAverage,
+    driverTwoCompletedLaps: finalDriverTwoStats.completedLaps,
+    driverTwoPodiumPercentage: finalDriverTwoStats.podiumPercentage,
+    driverTwoPoleToWinRatio: finalDriverTwoStats.poleToWinRatio,
+    driverTwoPointsPerRace: finalDriverTwoStats.pointsPerRace,
+    driverTwoTotalRaces: finalDriverTwoStats.totalRaces,
+    driverTwoPositionChanges: finalDriverTwoStats.positionChanges.map(
+      change => change.placesGained
+    ),
+    driverTwoTotalPositionsGained: finalDriverTwoStats.totalPositionsGained,
+    driverTwoResults: finalDriverTwoStats.races,
+
     championshipLeaderPoints
-  } as DriversSeasonStats
+  }
+
+  return seasonStats
 }
 
 // Fetch driver standings
