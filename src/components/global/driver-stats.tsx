@@ -95,30 +95,48 @@ export const DriverStats = ({
       title: 'Finish Position',
       value:
         driverNumber === 1
-          ? formatPosition(Number(result.driverOne?.position))
-          : formatPosition(Number(result.driverTwo?.position)),
+          ? result.driverOne?.position === null
+            ? '-'
+            : formatPosition(Number(result.driverOne?.position))
+          : result.driverTwo?.position === null
+            ? '-'
+            : formatPosition(Number(result.driverTwo?.position)),
       type: 'position'
     },
     {
       title: 'Grid Position',
       value:
         driverNumber === 1
-          ? formatPosition(Number(result.driverOne?.grid))
-          : formatPosition(Number(result.driverTwo?.grid)),
+          ? result.driverOne?.grid === null
+            ? '-'
+            : formatPosition(Number(result.driverOne?.grid))
+          : result.driverTwo?.grid === null
+            ? '-'
+            : formatPosition(Number(result.driverTwo?.grid)),
       type: 'grid'
     },
     {
       title: 'Points',
       value:
         driverNumber === 1
-          ? result.driverOne?.points
-          : result.driverTwo?.points,
+          ? result.driverOne?.points === null
+            ? '-'
+            : result.driverOne?.points
+          : result.driverTwo?.points === null
+            ? '-'
+            : result.driverTwo?.points,
       type: 'points'
     },
     {
       title: 'Laps',
       value:
-        driverNumber === 1 ? result.driverOne?.laps : result.driverTwo?.laps,
+        driverNumber === 1
+          ? result.driverOne?.laps === null
+            ? '-'
+            : result.driverOne?.laps
+          : result.driverTwo?.laps === null
+            ? '-'
+            : result.driverTwo?.laps,
       type: 'laps'
     },
     {
@@ -133,8 +151,8 @@ export const DriverStats = ({
       title: 'Status',
       value:
         driverNumber === 1
-          ? result.driverOne?.status
-          : result.driverTwo?.status,
+          ? result.driverOne?.status || 'DNS'
+          : result.driverTwo?.status || 'DNS',
       type: 'status'
     }
   ]

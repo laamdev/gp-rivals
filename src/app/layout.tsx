@@ -5,7 +5,6 @@ import { ReactNode } from 'react'
 import localFont from 'next/font/local'
 import { Space_Grotesk } from 'next/font/google'
 
-import { Header } from '@/components/navigation/header'
 import { Menu } from '@/components/navigation/slide-menu'
 
 import { cn } from '@/lib/utils'

@@ -1,51 +1,101 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@layer base {
-  :root {
-    --background: #0f0e10;
-    --foreground: #e5e4e2;
-    --primary: #e6e6e6;
-    --primary-foreground: #000000;
-    --secondary: #252428;
-    --secondary-foreground: #d9d8d6;
-    --accent: #212121;
-    --accent-foreground: #ffffff;
-    --destructive: #cc2929;
-    --destructive-foreground: #fafafa;
-    --muted: #3f3f43;
-    --muted-foreground: #d9d8d6;
-    --card: #1a1919;
-    --card-foreground: #e5e4e2;
-    --popover: #252428;
-    --popover-foreground: #d9d8d6;
-    --border: #333238;
-    --input: #333238;
-    --ring: #e6e6e6;
+@custom-variant dark (&:is(.dark *));
 
-    --chart-1: #e57260;
-    --chart-2: #2d856f;
-    --chart-3: #0c0d0e;
-    --chart-4: #e5c160;
-    --chart-5: #eba554;
-    --chart-6: #3d9d6c;
-    --chart-7: #9d3d96;
-    --chart-8: #cc3366;
-    --chart-9: #2d77cc;
-    --chart-10: #090908;
-    --chart-11: #993366;
-    --chart-12: #2d7993;
-    --chart-13: #6c9d3d;
-    --chart-14: #4b3d9d;
-    --chart-15: #e63358;
-    --chart-muted: #a1a1aa;
-    --chart-completed: #2d856f;
-    --chart-lapped: #2d77cc;
-    --chart-collision: #e5c160;
-    --chart-mechanical: #9d3d96;
-    --chart-other: #e57260;
+@plugin '@tailwindcss/typography';
+@plugin 'tailwindcss-animate';
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
   }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+:root {
+  --background: oklch(0.23 0.004 276.79);
+  --foreground: oklch(0.91 0.006 102.77);
+  --primary: oklch(0.91 0 0);
+  --primary-foreground: oklch(0 0 0);
+  --secondary: oklch(0.28 0.004 283.13);
+  --secondary-foreground: oklch(0.87 0.006 99.83);
+  --accent: oklch(0.24 0 0);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.54 0.196 25.76);
+  --destructive-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.35 0.004 283.13);
+  --muted-foreground: oklch(0.87 0.006 99.83);
+  --card: oklch(0.21 0.002 25.76);
+  --card-foreground: oklch(0.91 0.006 102.77);
+  --popover: oklch(0.28 0.004 283.13);
+  --popover-foreground: oklch(0.87 0.006 99.83);
+  --border: oklch(0.31 0.004 283.13);
+  --input: oklch(0.31 0.004 283.13);
+  --ring: oklch(0.91 0 0);
+  --radius: 0.5rem;
+
+  --chart-1: oklch(0.67 0.156 25.76);
+  --chart-2: oklch(0.52 0.126 162.95);
+  --chart-3: oklch(0.19 0.002 276.79);
+  --chart-4: oklch(0.82 0.126 92.06);
+  --chart-5: oklch(0.74 0.146 70.94);
+  --chart-6: oklch(0.61 0.126 142.95);
+  --chart-7: oklch(0.54 0.156 322.31);
+  --chart-8: oklch(0.54 0.236 25.76);
+  --chart-9: oklch(0.54 0.166 252.13);
+  --chart-10: oklch(0.15 0.002 276.79);
+  --chart-11: oklch(0.44 0.156 342.31);
+  --chart-12: oklch(0.54 0.096 202.13);
+  --chart-13: oklch(0.61 0.126 122.95);
+  --chart-14: oklch(0.44 0.156 292.31);
+  --chart-15: oklch(0.54 0.236 15.76);
+  --chart-muted: oklch(0.71 0.006 283.13);
+  --chart-completed: oklch(0.52 0.126 162.95);
+  --chart-lapped: oklch(0.54 0.166 252.13);
+  --chart-collision: oklch(0.82 0.126 92.06);
+  --chart-mechanical: oklch(0.54 0.156 322.31);
+  --chart-other: oklch(0.67 0.156 25.76);
+}
+
+@theme inline {
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif: var(--font-f1-wide), ui-serif, serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: var(--font-f1-regular), ui-monospace, monospace,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {

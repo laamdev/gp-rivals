@@ -10,7 +10,7 @@ interface NavLinkProps {
   children: ReactNode
   href: string
   className?: string
-  activeFilter?: string
+  activeFilter?: string | boolean | null
   disabled?: boolean
 }
 
@@ -23,13 +23,14 @@ export const NavLink = ({
 }: NavLinkProps) => {
   const pathname = usePathname()
 
-  const isActive = pathname.endsWith(activeFilter!)
+  const isActive = pathname.endsWith(activeFilter as string)
 
   return (
     <Link
       href={href}
+      scroll={false}
       className={cn(
-        'transform whitespace-nowrap rounded bg-zinc-900 px-2 py-1 text-xs font-semibold text-zinc-400 shadow-sm duration-300 ease-linear hover:bg-zinc-800',
+        'transform rounded bg-zinc-900 px-2 py-1 text-xs font-semibold whitespace-nowrap text-zinc-400 shadow-sm duration-300 ease-linear hover:bg-zinc-800',
         isActive && 'border border-zinc-400',
         disabled && 'pointer-events-none opacity-50',
         className

@@ -253,23 +253,41 @@ export const getComparison = (
   if (result.driverOne && result.driverTwo) {
     const stats = {
       position: {
-        d1: Number(result.driverOne.position),
-        d2: Number(result.driverTwo.position),
+        d1:
+          result.driverOne.position === null
+            ? Infinity
+            : Number(result.driverOne.position),
+        d2:
+          result.driverTwo.position === null
+            ? Infinity
+            : Number(result.driverTwo.position),
         higherIsBetter: false
       },
       grid: {
-        d1: Number(result.driverOne.grid),
-        d2: Number(result.driverTwo.grid),
+        d1:
+          result.driverOne.grid === null
+            ? Infinity
+            : Number(result.driverOne.grid),
+        d2:
+          result.driverTwo.grid === null
+            ? Infinity
+            : Number(result.driverTwo.grid),
         higherIsBetter: false
       },
       points: {
-        d1: Number(result.driverOne.points),
-        d2: Number(result.driverTwo.points),
+        d1:
+          result.driverOne.points === null
+            ? 0
+            : Number(result.driverOne.points),
+        d2:
+          result.driverTwo.points === null
+            ? 0
+            : Number(result.driverTwo.points),
         higherIsBetter: true
       },
       laps: {
-        d1: Number(result.driverOne.laps),
-        d2: Number(result.driverTwo.laps),
+        d1: result.driverOne.laps === null ? 0 : Number(result.driverOne.laps),
+        d2: result.driverTwo.laps === null ? 0 : Number(result.driverTwo.laps),
         higherIsBetter: true
       },
       finishTime: {
@@ -282,14 +300,38 @@ export const getComparison = (
         higherIsBetter: false
       },
       fastestLap: {
-        d1: Number(result.driverOne.fastestLapRank),
-        d2: Number(result.driverTwo.fastestLapRank),
+        d1:
+          result.driverOne.fastestLapRank === null
+            ? Infinity
+            : Number(result.driverOne.fastestLapRank),
+        d2:
+          result.driverTwo.fastestLapRank === null
+            ? Infinity
+            : Number(result.driverTwo.fastestLapRank),
         higherIsBetter: false
       }
     }
 
     const stat = stats[type as keyof typeof stats]
     if (!stat) return false
+
+    // If both drivers have null/invalid values, return 'tie'
+    if (
+      (type === 'position' || type === 'grid' || type === 'fastestLap') &&
+      stat.d1 === Infinity &&
+      stat.d2 === Infinity
+    ) {
+      return 'tie'
+    }
+
+    if (
+      (type === 'points' || type === 'laps') &&
+      stat.d1 === 0 &&
+      stat.d2 === 0
+    ) {
+      return 'tie'
+    }
+
     return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
   }
 
@@ -369,8 +411,8 @@ export const getLegendaryComparison = (
       higherIsBetter: true
     },
     poles: {
-      d1: Number(result.driverOne.gridFirst),
-      d2: Number(result.driverTwo.gridFirst),
+      d1: Number(result.driverOne.poles),
+      d2: Number(result.driverTwo.poles),
       higherIsBetter: true
     },
     podiums: {
@@ -382,16 +424,6 @@ export const getLegendaryComparison = (
       d1: Number(result.driverOne.fastestLaps),
       d2: Number(result.driverTwo.fastestLaps),
       higherIsBetter: true
-    },
-    averageRacePosition: {
-      d1: Number(result.driverOne.averagePosition),
-      d2: Number(result.driverTwo.averagePosition),
-      higherIsBetter: false
-    },
-    averageGridPosition: {
-      d1: Number(result.driverOne.averageGridPosition),
-      d2: Number(result.driverTwo.averageGridPosition),
-      higherIsBetter: false
     },
     pointsPerRace: {
       d1: Number(result.driverOne.pointsPerRace),
@@ -412,6 +444,64 @@ export const getLegendaryComparison = (
       d1: Number(result.driverOne.dnfs),
       d2: Number(result.driverTwo.dnfs),
       higherIsBetter: false
+    },
+    racesFinished: {
+      d1: Number(result.driverOne.racesFinished),
+      d2: Number(result.driverTwo.racesFinished),
+      higherIsBetter: true
+    }
+  }
+
+  const stat = legendaryStats[type as keyof typeof legendaryStats]
+  if (!stat) return false
+  return compareStats(driverNumber, stat.d1, stat.d2, stat.higherIsBetter)
+}
+
+export const getLegendarySeasonComparison = (
+  type: string,
+  driverNumber: 1 | 2,
+  result: any
+) => {
+  const legendaryStats = {
+    position: {
+      d1: Number(result.driverOne.position),
+      d2: Number(result.driverTwo.position),
+      higherIsBetter: false
+    },
+    points: {
+      d1: Number(result.driverOne.points),
+      d2: Number(result.driverTwo.points),
+      higherIsBetter: true
+    },
+    wins: {
+      d1: Number(result.driverOne.wins),
+      d2: Number(result.driverTwo.wins),
+      higherIsBetter: true
+    },
+    poles: {
+      d1: Number(result.driverOne.poles),
+      d2: Number(result.driverTwo.poles),
+      higherIsBetter: true
+    },
+    podiums: {
+      d1: Number(result.driverOne.podiums),
+      d2: Number(result.driverTwo.podiums),
+      higherIsBetter: true
+    },
+    fastestLaps: {
+      d1: Number(result.driverOne.fastestLaps),
+      d2: Number(result.driverTwo.fastestLaps),
+      higherIsBetter: true
+    },
+    dnfs: {
+      d1: Number(result.driverOne.dnfs),
+      d2: Number(result.driverTwo.dnfs),
+      higherIsBetter: false
+    },
+    races: {
+      d1: Number(result.driverOne.races),
+      d2: Number(result.driverTwo.races),
+      higherIsBetter: true
     }
   }
 

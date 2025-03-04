@@ -14,8 +14,6 @@ export default async function HomePage() {
     return null
   }
 
-  // // const teams = await getSeasonTeams('2024')
-
   return (
     <MaxWidthWrapper>
       <MainHeader />
@@ -45,7 +43,7 @@ export default async function HomePage() {
                         className={cn(
                           'transform duration-300',
                           idx % 2 === 0
-                            ? 'rotate-180 -scale-y-100 group-hover:-scale-y-105 group-hover:scale-x-105'
+                            ? '-scale-y-100 rotate-180 group-hover:scale-x-105 group-hover:-scale-y-105'
                             : 'group-hover:scale-105'
                         )}
                       />

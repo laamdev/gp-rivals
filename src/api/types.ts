@@ -1,8 +1,14 @@
 // API Response Types
 export interface ErgastResponse {
   MRData: {
+    xmlns: string
+    series: string
+    url: string
+    limit: string
+    offset: string
     total: string
-    RaceTable?: {
+    RaceTable: {
+      season: string
       Races: Race[]
     }
     StandingsTable?: {
@@ -18,56 +24,79 @@ export interface ErgastResponse {
 }
 
 export interface Race {
-  raceName: string
-  date: string
+  season: string
   round: string
-  Circuit: {
-    circuitId: string
-  }
-  Results: RaceResult[]
+  url: string
+  raceName: string
+  Circuit: Circuit
+  date: string
+  time: string
+  Results: Result[]
 }
 
-export interface RaceResult {
-  grid: string
+export interface Circuit {
+  circuitId: string
+  url: string
+  circuitName: string
+  Location: Location
+}
+
+export interface Location {
+  lat: string
+  long: string
+  locality: string
+  country: string
+}
+
+export interface Result {
+  number: string
   position: string
+  positionText: string
   points: string
+  Driver: Driver
+  Constructor: Constructor
+  grid: string
   laps: string
   status: string
-  Time?: { time: string }
+  Time?: {
+    millis: string
+    time: string
+  }
   FastestLap?: {
     rank: string
     lap: string
-    Time: { time: string }
+    Time: {
+      time: string
+    }
     AverageSpeed: {
       units: string
       speed: string
     }
   }
-  Driver: {
-    driverId: string
-  }
-}
-
-export interface Constructor {
-  Constructor: {
-    name: string
-    constructorId: string
-    nationality: string
-  }
-  position: string
-  points: string
-  wins: string
 }
 
 export interface Driver {
-  Driver: {
-    driverId: string
-    givenName: string
-    familyName: string
-  }
-  points: string
-  position: string
-  wins: string
+  driverId: string
+  permanentNumber: string
+  code: string
+  url: string
+  givenName: string
+  familyName: string
+  dateOfBirth: string
+  nationality: string
+  points?: string
+  position?: string
+  wins?: string
+}
+
+export interface Constructor {
+  constructorId: string
+  url: string
+  name: string
+  nationality: string
+  points?: string
+  position?: string
+  wins?: string
 }
 
 export interface StatusEntry {
@@ -82,7 +111,11 @@ export interface DriverStats {
   completedLaps: number
   poleToWinRatio: number
   podiumPercentage: number
-  points: Driver | undefined
+  points: {
+    points: string
+    position: string
+    wins: string
+  }
   status: StatusEntry[]
   races: Race[]
   fastestLaps: number
@@ -107,42 +140,84 @@ export interface PositionChange {
 }
 
 export interface DriversSeasonStats {
-  driverOneGridAverage: number
-  driverOneRaceAverage: number
-  driverTwoGridAverage: number
-  driverTwoRaceAverage: number
-  driverOnePoints: string
-  driverTwoPoints: string
   driverOnePosition: string
-  driverTwoPosition: string
-  driverOneWins: string
-  driverTwoWins: string
+  driverOnePoints: string
+  driverOneWins: number
   driverOnePoles: number
-  driverTwoPoles: number
-  driverOneBetterFinishes: number
-  driverTwoBetterFinishes: number
-  driverOneBetterGrid: number
-  driverTwoBetterGrid: number
-  driverOneStatus: StatusEntry[]
-  driverTwoStatus: StatusEntry[]
-  driverOnePositionChanges: PositionChange[]
-  driverTwoPositionChanges: PositionChange[]
-  driverOneTotalPositionsGained: number
-  driverTwoTotalPositionsGained: number
-  driverOneFastestLaps: number
-  driverTwoFastestLaps: number
   driverOnePodiums: number
-  driverTwoPodiums: number
-  driverOnePoleToWinRatio: number
-  driverTwoPoleToWinRatio: number
-  driverOneTotalRaces: number
-  driverTwoTotalRaces: number
-  driverOnePointsPerRace: number
-  driverTwoPointsPerRace: number
+  driverOneFastestLaps: number
+  driverOneBetterFinishes: number
+  driverOneBetterGrid: number
+  driverOneRaceAverage: number
+  driverOneGridAverage: number
   driverOneCompletedLaps: number
-  driverTwoCompletedLaps: number
-  driverOneLapCompletion: number
-  driverTwoLapCompletion: number
   driverOnePodiumPercentage: number
+  driverOnePoleToWinRatio: number
+  driverOnePointsPerRace: number
+  driverOneTotalRaces: number
+  driverOnePositionChanges: number[]
+  driverOneTotalPositionsGained: number
+  driverOneResults: Race[]
+
+  driverTwoPosition: string
+  driverTwoPoints: string
+  driverTwoWins: number
+  driverTwoPoles: number
+  driverTwoPodiums: number
+  driverTwoFastestLaps: number
+  driverTwoBetterFinishes: number
+  driverTwoBetterGrid: number
+  driverTwoRaceAverage: number
+  driverTwoGridAverage: number
+  driverTwoCompletedLaps: number
   driverTwoPodiumPercentage: number
+  driverTwoPoleToWinRatio: number
+  driverTwoPointsPerRace: number
+  driverTwoTotalRaces: number
+  driverTwoPositionChanges: number[]
+  driverTwoTotalPositionsGained: number
+  driverTwoResults: Race[]
+}
+
+export interface DriverStanding {
+  position: string
+  positionText: string
+  points: string
+  wins: string
+  Driver: {
+    driverId: string
+    permanentNumber: string
+    code: string
+    url: string
+    givenName: string
+    familyName: string
+    dateOfBirth: string
+    nationality: string
+  }
+  Constructors: Array<{
+    constructorId: string
+    url: string
+    name: string
+    nationality: string
+  }>
+}
+
+export interface DriverStandingsResponse {
+  MRData: {
+    xmlns: string
+    series: string
+    url: string
+    limit: string
+    offset: string
+    total: string
+    StandingsTable: {
+      season: string
+      round: string
+      StandingsLists: Array<{
+        season: string
+        round: string
+        DriverStandings: DriverStanding[]
+      }>
+    }
+  }
 }

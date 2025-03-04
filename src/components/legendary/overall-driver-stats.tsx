@@ -9,11 +9,9 @@ interface DriverStatsProps {
       championships: number
       points: number
       wins: number
-      gridFirst: number
+      poles: number
       podiums: number
       fastestLaps: number
-      averagePosition: number
-      averageGridPosition: number
       pointsPerRace: number
       poleToWinRatio: number
       dnfs: number
@@ -23,16 +21,15 @@ interface DriverStatsProps {
       championships: number
       points: number
       wins: number
-      gridFirst: number
+      poles: number
       podiums: number
       fastestLaps: number
-      averagePosition: number
-      averageGridPosition: number
       pointsPerRace: number
       poleToWinRatio: number
       dnfs: number
       racesFinished: number
     }
+    totalRaces: number
   }
   color: string
   driver: string
@@ -75,9 +72,7 @@ export const OverallDriverStats = ({
     {
       title: 'Poles',
       value:
-        driverNumber === 1
-          ? result.driverOne.gridFirst
-          : result.driverTwo.gridFirst,
+        driverNumber === 1 ? result.driverOne.poles : result.driverTwo.poles,
       type: 'poles'
     },
     {
@@ -95,22 +90,6 @@ export const OverallDriverStats = ({
           ? result.driverOne.podiums
           : result.driverTwo.podiums,
       type: 'podiums'
-    },
-    {
-      title: 'Average Race Position',
-      value:
-        driverNumber === 1
-          ? result.driverOne.averagePosition.toFixed(2)
-          : result.driverTwo.averagePosition.toFixed(2),
-      type: 'averageRacePosition'
-    },
-    {
-      title: 'Average Grid Position',
-      value:
-        driverNumber === 1
-          ? result.driverOne.averageGridPosition.toFixed(2)
-          : result.driverTwo.averageGridPosition.toFixed(2),
-      type: 'averageGridPosition'
     },
     {
       title: 'DNFs',

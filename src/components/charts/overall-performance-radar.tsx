@@ -6,7 +6,8 @@ import {
   PolarGrid,
   // // PolarRadiusAxis,
   Radar,
-  RadarChart
+  RadarChart,
+  PolarRadiusAxis
 } from 'recharts'
 
 import {
@@ -24,7 +25,7 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart'
 
-import { SEASON_LAPS_2024 } from '@/api/constants'
+import { SEASON_LAPS_2024, MAX_POINTS_2024 } from '@/api/constants'
 
 export const OverallPerformanceRadar = ({
   bestDriverPoints,
@@ -53,7 +54,7 @@ export const OverallPerformanceRadar = ({
 }) => {
   const maxValues = {
     'Points (vs. best driver)': bestDriverPoints,
-    Points: 672,
+    Points: MAX_POINTS_2024,
     'Average Race Result': 20,
     'Average Grid Position': 20,
     'Laps Completed': SEASON_LAPS_2024,
@@ -149,76 +150,42 @@ export const OverallPerformanceRadar = ({
           config={chartConfig}
           className='mx-auto aspect-square max-h-[500px]'
         >
-          <RadarChart data={chartData}>
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  hideLabel
-                  formatter={(value, name, props) => {
-                    const stat = props.payload
-                    const isDriverOne = name === 'driverOne'
-                    const driverColor = isDriverOne
-                      ? primaryColor
-                      : secondaryColor
-
-                    if (!isDriverOne) {
-                      return (
-                        <div className='flex w-full items-center text-xs text-muted-foreground'>
-                          <span style={{ color: driverColor }}>
-                            {driverTwo}
-                          </span>
-                          <div className='ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground'>
-                            {stat.driverTwoOriginal}
-                          </div>
-                        </div>
-                      )
-                    }
-
-                    return (
-                      <div className='flex min-w-[130px] flex-col gap-2'>
-                        <div className='text-center text-xs font-medium text-foreground'>
-                          {stat.stat}
-                          {/* (max: {stat.maxValue}) */}
-                        </div>
-                        <div className='flex w-full items-center text-xs text-muted-foreground'>
-                          <span style={{ color: driverColor }}>
-                            {driverOne}
-                          </span>
-                          <div className='ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground'>
-                            {stat.driverOneOriginal}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  }}
-                />
-              }
-            />
+          <RadarChart
+            data={chartData}
+            outerRadius='80%'
+            startAngle={90}
+            endAngle={-270}
+            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          >
+            <PolarGrid gridType='circle' />
             <PolarAngleAxis
               dataKey='stat'
-              tickFormatter={value => {
-                // Log to verify what value is being passed
-                console.log('Tick value:', value)
-                return value
-              }}
+              tick={{ fill: '#888888', fontSize: 12 }}
+              tickLine={false}
             />
-            {/* Consistent domain after normalization */}
-            <PolarGrid radialLines={false} />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 100]}
+              tick={false}
+              axisLine={false}
+            />
             <Radar
               dataKey='driverOne'
               fill={primaryColor}
-              fillOpacity={0}
+              fillOpacity={0.2}
               stroke={primaryColor}
               strokeWidth={2}
+              dot={{ r: 3 }}
             />
             <Radar
               dataKey='driverTwo'
               fill={secondaryColor}
-              fillOpacity={0}
+              fillOpacity={0.2}
               stroke={secondaryColor}
               strokeWidth={2}
+              dot={{ r: 3 }}
             />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
           </RadarChart>
         </ChartContainer>
       </CardContent>

@@ -1,67 +1,14 @@
 import { fetchErgastData } from '@/api'
-import {
-  calculateAveragePosition,
-  calculateDriverStats,
-  calculateRaceCompletion,
-  comparePositions
-} from '@/api/helpers'
+import { comparePositions } from '@/api/helpers'
 import {
   DriversSeasonStats,
   DriverStats,
   ErgastResponse,
-  Race,
-  RaceResult
+  DriverStandingsResponse,
+  DriverStanding,
+  PositionChange
 } from '@/api/types'
-import { SEASON_LAPS_2024 } from '@/api/constants'
-
-// Fetch season races data
-export const getSeasonRaces = async (seasonSlug: string) => {
-  const response = await fetchErgastData<ErgastResponse>(
-    `/${seasonSlug}/races.json`
-  )
-
-  if (!response?.MRData?.RaceTable?.Races) return undefined
-
-  return {
-    seasonRaces: response.MRData.RaceTable.Races,
-    totalSeasonRaces: response.MRData.total
-  }
-}
-
-// Helper function to find driver result
-const findDriverResult = (race: Race, driverId: string) =>
-  race.Results?.find(r => r.Driver.driverId === driverId)
-
-// Helper function to calculate race stats
-const calculateRaceStats = (races: Race[], driverId: string) => {
-  const poles = races.filter(
-    race => findDriverResult(race, driverId)?.grid === '1'
-  )
-  const winsFromPole = poles.filter(
-    race => findDriverResult(race, driverId)?.position === '1'
-  )
-  const podiums = races.filter(race => {
-    const result = findDriverResult(race, driverId)
-    return result?.position && parseInt(result.position) <= 3
-  }).length
-  const completedLaps = races.reduce((sum, race) => {
-    const result = findDriverResult(race, driverId)
-    return sum + parseInt(result?.laps || '0')
-  }, 0)
-
-  return {
-    poles: poles.length,
-    winsFromPole: winsFromPole.length,
-    podiums,
-    completedLaps,
-    poleToWinRatio:
-      poles.length > 0
-        ? Number(((winsFromPole.length / poles.length) * 100).toFixed(2))
-        : 0,
-    podiumPercentage:
-      races.length > 0 ? Number(((podiums / races.length) * 100).toFixed(2)) : 0
-  }
-}
+import { FINISHED_STATUSES } from '@/api/constants'
 
 // Fetch driver stats
 const getDriverStats = async (
@@ -69,59 +16,189 @@ const getDriverStats = async (
   driverId: string
 ): Promise<DriverStats | undefined> => {
   try {
-    const [seasonData, raceData, statusData] = await Promise.all([
-      fetchErgastData<ErgastResponse>(
-        `/${seasonSlug}/drivers/${driverId}/driverStandings.json`
-      ),
-      fetchErgastData<ErgastResponse>(
-        `/${seasonSlug}/drivers/${driverId}/results.json`
-      ),
-      fetchErgastData<ErgastResponse>(`/${seasonSlug}/status.json`)
-    ])
+    const raceData = await fetchErgastData<ErgastResponse>(
+      `/${seasonSlug}/drivers/${driverId}/results.json`
+    )
 
-    if (
-      !raceData?.MRData?.RaceTable?.Races ||
-      !statusData?.MRData?.StatusTable?.Status ||
-      !seasonData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings
-    ) {
+    if (!raceData?.MRData?.RaceTable?.Races) {
       return undefined
     }
 
     const races = raceData.MRData.RaceTable.Races
-    const raceCompletion = calculateRaceCompletion(statusData.MRData)
-    const driverStandings =
-      seasonData.MRData.StandingsTable.StandingsLists[0].DriverStandings
-    const points = driverStandings.find(
-      driver => driver.Driver.driverId === driverId
+    const totalRaces = races.length
+
+    // Calculate points and position from race results
+    const points = races
+      .reduce((sum, race) => {
+        // Check if Results array exists and has elements
+        if (!race.Results || race.Results.length === 0) return sum
+        return sum + Number(race.Results[0]?.points || 0)
+      }, 0)
+      .toString()
+
+    const position =
+      races.length > 0 && races[races.length - 1].Results?.[0]
+        ? races[races.length - 1].Results[0].position
+        : ''
+
+    const wins = races
+      .filter(race => race.Results?.[0]?.position === '1')
+      .length.toString()
+
+    // Calculate basic stats
+    const poles = races.filter(race => race.Results?.[0]?.grid === '1').length
+    const podiums = races.filter(race => {
+      if (!race.Results?.[0]) return false
+      const pos = parseInt(race.Results[0].position)
+      return !isNaN(pos) && pos <= 3
+    }).length
+
+    const completedLaps = races.reduce((sum, race) => {
+      if (!race.Results?.[0]) return sum
+      return sum + parseInt(race.Results[0].laps || '0')
+    }, 0)
+
+    const fastestLaps = races.filter(
+      race => race.Results?.[0]?.FastestLap?.rank === '1'
+    ).length
+
+    // Calculate pole to win ratio - only count races where driver started from pole and won
+    const winsFromPole = races.filter(
+      race =>
+        race.Results?.[0]?.grid === '1' && race.Results?.[0]?.position === '1'
+    ).length
+
+    const poleToWinRatio =
+      poles > 0 ? Number(((winsFromPole / poles) * 100).toFixed(2)) : 0
+
+    // Calculate grid and race position averages
+    const gridPositions = races
+      .map(race => Number(race.Results?.[0]?.grid || 0))
+      .filter(pos => pos > 0)
+
+    const racePositions = races
+      .map(race => Number(race.Results?.[0]?.position || 0))
+      .filter(pos => pos > 0)
+
+    const gridAverage =
+      gridPositions.length > 0
+        ? Number(
+            (
+              gridPositions.reduce((sum, pos) => sum + pos, 0) /
+              gridPositions.length
+            ).toFixed(2)
+          )
+        : 0
+
+    const raceAverage =
+      racePositions.length > 0
+        ? Number(
+            (
+              racePositions.reduce((sum, pos) => sum + pos, 0) /
+              racePositions.length
+            ).toFixed(2)
+          )
+        : 0
+
+    // Calculate position changes and DNF stats
+    const positionChanges: PositionChange[] = races.map(race => {
+      if (!race.Results?.[0]) {
+        return {
+          race: race.raceName,
+          grid: 0,
+          finish: 0,
+          placesGained: 0,
+          status: 'Did not participate'
+        }
+      }
+      const grid = parseInt(race.Results[0].grid)
+      const finish = parseInt(race.Results[0].position)
+      if (isNaN(grid) || isNaN(finish)) {
+        return {
+          race: race.raceName,
+          grid: 0,
+          finish: 0,
+          placesGained: 0,
+          status: race.Results[0].status || 'Unknown'
+        }
+      }
+      return {
+        race: race.raceName,
+        grid,
+        finish,
+        placesGained: grid - finish,
+        status: race.Results[0].status
+      }
+    })
+
+    const totalPositionsGained = positionChanges.reduce(
+      (sum, change) => sum + change.placesGained,
+      0
     )
-    const basicStats = calculateDriverStats(raceData, points)
-    const raceStats = calculateRaceStats(races, driverId)
+
+    const finishedRaces = races.filter(race =>
+      FINISHED_STATUSES.includes(race.Results?.[0]?.status || '')
+    ).length
+
+    const dnfRaces = races.filter(
+      race => !FINISHED_STATUSES.includes(race.Results?.[0]?.status || '')
+    ).length
 
     return {
-      ...basicStats,
-      ...raceStats,
-      points,
-      status: statusData.MRData.StatusTable.Status,
+      poles,
+      podiums,
+      completedLaps,
+      poleToWinRatio,
+      podiumPercentage:
+        totalRaces > 0 ? Number(((podiums / totalRaces) * 100).toFixed(2)) : 0,
+      points: { points, position, wins },
+      status: [], // This would need circuit-specific status data
       races,
-      finishedRaces: raceCompletion.finishedRaces,
-      dnfRaces: raceCompletion.dnfRaces,
-      fastestLaps: basicStats.fastestLaps ?? 0,
-      positionChanges: basicStats.positionChanges ?? [],
-      totalPositionsGained: basicStats.totalPositionsGained ?? 0,
-      lapsCompleted: basicStats.lapsCompleted ?? 0,
-      totalRaces: basicStats.totalRaces ?? 0,
-      pointsPerRace: basicStats.pointsPerRace ?? 0,
-      lapCompletionPercentage:
-        SEASON_LAPS_2024 > 0
-          ? Number(
-              ((raceStats.completedLaps / SEASON_LAPS_2024) * 100).toFixed(2)
-            )
-          : 0,
-      gridAverage: Number(calculateAveragePosition(races, 'gridAverage')),
-      raceAverage: Number(calculateAveragePosition(races, 'raceAverage'))
+      fastestLaps,
+      positionChanges,
+      totalPositionsGained,
+      lapsCompleted: completedLaps,
+      totalRaces,
+      pointsPerRace:
+        totalRaces > 0 ? Number((parseInt(points) / totalRaces).toFixed(2)) : 0,
+      finishedRaces,
+      dnfRaces,
+      lapCompletionPercentage: 0, // This would need total possible laps data
+      gridAverage,
+      raceAverage
     }
   } catch (error) {
+    console.error('Error fetching driver stats:', error)
     return undefined
+  }
+}
+
+// Helper function to map driver stats to season stats format
+const mapDriverToSeasonStats = (
+  stats: DriverStats,
+  prefix: 'driverOne' | 'driverTwo'
+) => {
+  return {
+    [`${prefix}GridAverage`]: stats.gridAverage,
+    [`${prefix}RaceAverage`]: stats.raceAverage,
+    [`${prefix}Points`]: stats.points.points,
+    [`${prefix}Position`]: stats.points.position,
+    [`${prefix}Wins`]: Number(stats.points.wins),
+    [`${prefix}Poles`]: stats.poles,
+    [`${prefix}PodiumPercentage`]: stats.podiumPercentage,
+    [`${prefix}Status`]: stats.status,
+    [`${prefix}PositionChanges`]: stats.positionChanges.map(
+      change => change.placesGained
+    ),
+    [`${prefix}TotalPositionsGained`]: stats.totalPositionsGained,
+    [`${prefix}FastestLaps`]: stats.fastestLaps,
+    [`${prefix}Podiums`]: stats.podiums,
+    [`${prefix}PoleToWinRatio`]: stats.poleToWinRatio,
+    [`${prefix}TotalRaces`]: stats.totalRaces,
+    [`${prefix}PointsPerRace`]: stats.pointsPerRace,
+    [`${prefix}CompletedLaps`]: stats.completedLaps,
+    [`${prefix}LapCompletion`]: stats.lapCompletionPercentage,
+    [`${prefix}Results`]: stats.races
   }
 }
 
@@ -135,177 +212,159 @@ export const getDriversSeasonStats = async ({
   driverOne: string
   driverTwo: string
 }): Promise<DriversSeasonStats | undefined> => {
-  const [driverOneStats, driverTwoStats] = await Promise.all([
+  const [driverOneStats, driverTwoStats, driverStandings] = await Promise.all([
     getDriverStats(season, driverOne),
-    getDriverStats(season, driverTwo)
+    getDriverStats(season, driverTwo),
+    getDriverStandings(season)
   ])
 
-  if (!driverOneStats || !driverTwoStats) return undefined
+  // Create default stats for when a driver has no data
+  const defaultDriverStats: DriverStats = {
+    poles: 0,
+    podiums: 0,
+    completedLaps: 0,
+    poleToWinRatio: 0,
+    podiumPercentage: 0,
+    points: { points: '0', position: '0', wins: '0' },
+    status: [],
+    races: [],
+    fastestLaps: 0,
+    positionChanges: [],
+    totalPositionsGained: 0,
+    lapsCompleted: 0,
+    totalRaces: 0,
+    pointsPerRace: 0,
+    finishedRaces: 0,
+    dnfRaces: 0,
+    lapCompletionPercentage: 0,
+    gridAverage: 0,
+    raceAverage: 0
+  }
+
+  // Use default stats if either driver's stats are undefined
+  const finalDriverOneStats = driverOneStats || defaultDriverStats
+  const finalDriverTwoStats = driverTwoStats || defaultDriverStats
+
+  const driverOneStanding = driverStandings?.find(
+    standing => standing.Driver.driverId === driverOne
+  )
+  const driverTwoStanding = driverStandings?.find(
+    standing => standing.Driver.driverId === driverTwo
+  )
+
+  // Get championship leader's points
+  const championshipLeaderPoints = driverStandings?.[0]?.points || '0'
 
   const raceComparison = comparePositions(
-    driverOneStats.races,
-    driverTwoStats.races,
+    finalDriverOneStats.races,
+    finalDriverTwoStats.races,
     'race'
   )
   const gridComparison = comparePositions(
-    driverOneStats.races,
-    driverTwoStats.races,
+    finalDriverOneStats.races,
+    finalDriverTwoStats.races,
     'grid'
   )
 
+  const driverOneSeasonStats = mapDriverToSeasonStats(
+    finalDriverOneStats,
+    'driverOne'
+  )
+  const driverTwoSeasonStats = mapDriverToSeasonStats(
+    finalDriverTwoStats,
+    'driverTwo'
+  )
+
   return {
-    driverOneGridAverage: driverOneStats.gridAverage,
-    driverOneRaceAverage: driverOneStats.raceAverage,
-    driverTwoGridAverage: driverTwoStats.gridAverage,
-    driverTwoRaceAverage: driverTwoStats.raceAverage,
-    driverOnePoints: driverOneStats.points?.points ?? '0',
-    driverTwoPoints: driverTwoStats.points?.points ?? '0',
-    driverOnePosition: driverOneStats.points?.position ?? '',
-    driverTwoPosition: driverTwoStats.points?.position ?? '',
-    driverOneWins: driverOneStats.points?.wins ?? '0',
-    driverTwoWins: driverTwoStats.points?.wins ?? '0',
-    driverOnePoles: driverOneStats.poles,
-    driverTwoPoles: driverTwoStats.poles,
-    driverOnePodiumPercentage: driverOneStats.podiumPercentage,
-    driverTwoPodiumPercentage: driverTwoStats.podiumPercentage,
+    ...driverOneSeasonStats,
+    ...driverTwoSeasonStats,
     driverOneBetterFinishes: raceComparison.driver1Better,
     driverTwoBetterFinishes: raceComparison.driver2Better,
     driverOneBetterGrid: gridComparison.driver1Better,
     driverTwoBetterGrid: gridComparison.driver2Better,
-    driverOneStatus: driverOneStats.status,
-    driverTwoStatus: driverTwoStats.status,
-    driverOnePositionChanges: driverOneStats.positionChanges,
-    driverTwoPositionChanges: driverTwoStats.positionChanges,
-    driverOneTotalPositionsGained: driverOneStats.totalPositionsGained,
-    driverTwoTotalPositionsGained: driverTwoStats.totalPositionsGained,
-    driverOneFastestLaps: driverOneStats.fastestLaps,
-    driverTwoFastestLaps: driverTwoStats.fastestLaps,
-    driverOnePodiums: driverOneStats.podiums,
-    driverTwoPodiums: driverTwoStats.podiums,
-    driverOnePoleToWinRatio: driverOneStats.poleToWinRatio,
-    driverTwoPoleToWinRatio: driverTwoStats.poleToWinRatio,
-    driverOneTotalRaces: driverOneStats.totalRaces,
-    driverTwoTotalRaces: driverTwoStats.totalRaces,
-    driverOnePointsPerRace: driverOneStats.pointsPerRace,
-    driverTwoPointsPerRace: driverTwoStats.pointsPerRace,
-    driverOneCompletedLaps: driverOneStats.completedLaps,
-    driverTwoCompletedLaps: driverTwoStats.completedLaps,
-    driverOneLapCompletion: driverOneStats.lapCompletionPercentage,
-    driverTwoLapCompletion: driverTwoStats.lapCompletionPercentage
-  }
+    driverOnePosition:
+      driverOneStanding?.position || finalDriverOneStats.points.position || '0',
+    driverOnePoints:
+      driverOneStanding?.points || finalDriverOneStats.points.points || '0',
+    driverOneWins: Number(
+      driverOneStanding?.wins || finalDriverOneStats.points.wins || '0'
+    ),
+    driverTwoPosition:
+      driverTwoStanding?.position || finalDriverTwoStats.points.position || '0',
+    driverTwoPoints:
+      driverTwoStanding?.points || finalDriverTwoStats.points.points || '0',
+    driverTwoWins: Number(
+      driverTwoStanding?.wins || finalDriverTwoStats.points.wins || '0'
+    ),
+    championshipLeaderPoints
+  } as DriversSeasonStats
 }
 
-// Fetch driver race result
-const getDriverRaceResult = async (
-  season: string,
-  circuit: string,
-  driver: string
-) => {
-  const data = await fetchErgastData<ErgastResponse>(
-    `/${season}/circuits/${circuit}/drivers/${driver}/results.json`
-  )
-  if (!data?.MRData?.RaceTable?.Races?.[0]) return undefined
-
-  const race = data.MRData.RaceTable.Races[0]
-  return {
-    raceName: race.raceName,
-    result: race.Results[0]
-  }
-}
-
-// Fetch stats for both drivers in a specific race
-export const getDriversRaceStats = async ({
-  season,
-  circuit,
-  driverOne,
-  driverTwo
-}: {
+// Fetch driver standings
+export const getDriverStandings = async (
   season: string
-  circuit: string
-  driverOne: string
-  driverTwo: string
-}) => {
-  const [driverOneStats, driverTwoStats] = await Promise.all([
-    getDriverRaceResult(season, circuit, driverOne),
-    getDriverRaceResult(season, circuit, driverTwo)
-  ])
-
-  if (!driverOneStats?.result || !driverTwoStats?.result) return undefined
-
-  return {
-    raceName: driverOneStats.raceName,
-    driverOne: {
-      position: driverOneStats.result.position,
-      grid: driverOneStats.result.grid,
-      points: driverOneStats.result.points,
-      laps: driverOneStats.result.laps,
-      status: driverOneStats.result.status,
-      finishTime: driverOneStats.result.Time?.time,
-      fastestLap: driverOneStats.result.FastestLap?.Time.time,
-      fastestLapRank: driverOneStats.result.FastestLap?.rank
-    },
-    driverTwo: {
-      position: driverTwoStats.result.position,
-      grid: driverTwoStats.result.grid,
-      points: driverTwoStats.result.points,
-      laps: driverTwoStats.result.laps,
-      status: driverTwoStats.result.status,
-      finishTime: driverTwoStats.result.Time?.time,
-      fastestLap: driverTwoStats.result.FastestLap?.Time.time,
-      fastestLapRank: driverTwoStats.result.FastestLap?.rank
-    }
-  }
-}
-
-// Fetch the season champion
-export const getSeasonChampion = async (season: string) => {
-  const data = await fetchErgastData<ErgastResponse>(
-    `/${season}/driverStandings/1.json`
+): Promise<DriverStanding[] | undefined> => {
+  const response = await fetchErgastData<DriverStandingsResponse>(
+    `/${season}/driverstandings.json`
   )
-  if (!data?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings?.[0])
-    return undefined
 
-  const champion =
-    data.MRData.StandingsTable.StandingsLists[0].DriverStandings[0]
-  return {
-    driverName: `${champion.Driver.givenName} ${champion.Driver.familyName}`,
-    points: Number(champion.points),
-    wins: Number(champion.wins),
-    position: Number(champion.position)
+  if (!response?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings) {
+    return undefined
   }
+
+  return response.MRData.StandingsTable.StandingsLists[0].DriverStandings
 }
 
-// Fetch constructor standings
-export const getConstructorStandings = async ({
-  season,
-  constructorId
-}: {
-  season: string
-  constructorId: string
-}) => {
-  const data = await fetchErgastData<ErgastResponse>(
-    `/${season}/constructorStandings.json`
-  )
-  if (!data?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings)
-    return undefined
+//! LEGENDARY
 
-  const standing =
-    data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings.find(
-      constructor => constructor.Constructor.constructorId === constructorId
-    )
-  if (!standing) return undefined
-
-  return {
-    position: Number(standing.position),
-    points: Number(standing.points),
-    wins: Number(standing.wins),
-    constructorName: standing.Constructor.name,
-    nationality: standing.Constructor.nationality
-  }
+// Types for legendary rivalry stats
+interface LegendaryDriverSeasonStats {
+  points: number
+  wins: number
+  poles: number
+  podiums: number
+  fastestLaps: number
+  position: number
+  races: number
+  dnfs: number
 }
 
-// Fetch legendary rivalry season stats
-export const getLegendaryRivalrySeasonStats = async ({
+interface LegendarySeasonStats {
+  year: number
+  driverOne: LegendaryDriverSeasonStats
+  driverTwo: LegendaryDriverSeasonStats
+}
+
+interface LegendaryOverallStats {
+  driverOne: {
+    points: number
+    wins: number
+    poles: number
+    podiums: number
+    fastestLaps: number
+    championships: number
+    pointsPerRace: number
+    poleToWinRatio: number
+    dnfs: number
+    racesFinished: number
+  }
+  driverTwo: {
+    points: number
+    wins: number
+    poles: number
+    podiums: number
+    fastestLaps: number
+    championships: number
+    pointsPerRace: number
+    poleToWinRatio: number
+    dnfs: number
+    racesFinished: number
+  }
+  totalRaces: number
+}
+
+// Fetch stats for a single season of a legendary rivalry
+export const getLegendarySeasonStats = async ({
   year,
   driverOne,
   driverTwo
@@ -313,144 +372,215 @@ export const getLegendaryRivalrySeasonStats = async ({
   year: number
   driverOne: string
   driverTwo: string
-}) => {
-  const yearString = year.toString()
-  const seasonStats = await getDriversSeasonStats({
-    season: yearString,
-    driverOne,
-    driverTwo
-  })
+}): Promise<LegendarySeasonStats | undefined> => {
+  try {
+    // Fetch driver standings for the year
+    const standingsResponse = await fetch(
+      `https://api.jolpi.ca/ergast/f1/${year}/driverstandings/`
+    )
+    const standingsData = await standingsResponse.json()
 
-  if (!seasonStats) return undefined
+    // Fetch results for both drivers
+    const [driverOneResultsResponse, driverTwoResultsResponse] =
+      await Promise.all([
+        fetch(
+          `https://api.jolpi.ca/ergast/f1/${year}/drivers/${driverOne}/results.json`
+        ),
+        fetch(
+          `https://api.jolpi.ca/ergast/f1/${year}/drivers/${driverTwo}/results.json`
+        )
+      ])
 
-  return {
-    ...seasonStats,
-    year
+    const driverOneResults = await driverOneResultsResponse.json()
+    const driverTwoResults = await driverTwoResultsResponse.json()
+
+    // Process driver one results
+    const driverOneStats: LegendaryDriverSeasonStats = {
+      points: 0,
+      wins: 0,
+      poles: 0,
+      podiums: 0,
+      fastestLaps: 0,
+      position: 0,
+      races: 0,
+      dnfs: 0
+    }
+
+    // Process driver two results
+    const driverTwoStats: LegendaryDriverSeasonStats = {
+      points: 0,
+      wins: 0,
+      poles: 0,
+      podiums: 0,
+      fastestLaps: 0,
+      position: 0,
+      races: 0,
+      dnfs: 0
+    }
+
+    // Process standings data
+    const standings =
+      standingsData.MRData.StandingsTable.StandingsLists[0].DriverStandings
+    for (const standing of standings) {
+      if (standing.Driver.driverId === driverOne) {
+        driverOneStats.points = Number(standing.points)
+        driverOneStats.position = Number(standing.position)
+      } else if (standing.Driver.driverId === driverTwo) {
+        driverTwoStats.points = Number(standing.points)
+        driverTwoStats.position = Number(standing.position)
+      }
+    }
+
+    // Process driver one race results
+    const driverOneRaces = driverOneResults.MRData.RaceTable.Races
+    driverOneStats.races = driverOneRaces.length
+    for (const race of driverOneRaces) {
+      const result = race.Results[0]
+      if (result.position === '1') driverOneStats.wins++
+      if (Number(result.position) <= 3) driverOneStats.podiums++
+      if (result.grid === '1') driverOneStats.poles++
+      if (result.FastestLap?.rank === '1') driverOneStats.fastestLaps++
+      if (result.status !== 'Finished' && !result.status.startsWith('+'))
+        driverOneStats.dnfs++
+    }
+
+    // Process driver two race results
+    const driverTwoRaces = driverTwoResults.MRData.RaceTable.Races
+    driverTwoStats.races = driverTwoRaces.length
+    for (const race of driverTwoRaces) {
+      const result = race.Results[0]
+      if (result.position === '1') driverTwoStats.wins++
+      if (Number(result.position) <= 3) driverTwoStats.podiums++
+      if (result.grid === '1') driverTwoStats.poles++
+      if (result.FastestLap?.rank === '1') driverTwoStats.fastestLaps++
+      if (result.status !== 'Finished' && !result.status.startsWith('+'))
+        driverTwoStats.dnfs++
+    }
+
+    console.log('Season stats for', year, ':', {
+      driverOne: driverOneStats,
+      driverTwo: driverTwoStats
+    })
+
+    return {
+      year,
+      driverOne: driverOneStats,
+      driverTwo: driverTwoStats
+    }
+  } catch (error) {
+    console.error('Error fetching legendary season stats:', error)
+    return undefined
   }
 }
 
-// Fetch overall results for a legendary rivalry
-export const getLegendaryRivalryOverallResults = async (rivalry: {
+// Fetch overall stats for a legendary rivalry
+export const getLegendaryOverallStats = async (rivalry: {
   seasons: Array<{ year: number }>
   drivers: Array<{ slug: string }>
-}) => {
-  const seasonsResults = await Promise.all(
-    rivalry.seasons.map(season =>
-      getLegendaryRivalrySeasonStats({
-        year: season.year,
-        driverOne: rivalry.drivers[0].slug,
-        driverTwo: rivalry.drivers[1].slug
-      })
+}): Promise<LegendaryOverallStats | undefined> => {
+  try {
+    // Fetch stats for each season
+    const seasonsResults = await Promise.all(
+      rivalry.seasons.map(season =>
+        getLegendarySeasonStats({
+          year: season.year,
+          driverOne: rivalry.drivers[0].slug,
+          driverTwo: rivalry.drivers[1].slug
+        })
+      )
     )
-  )
 
-  const stats = {
-    driverOne: {
-      points: 0,
-      wins: 0,
-      poles: 0,
-      podiums: 0,
-      fastestLaps: 0,
-      championships: 0,
-      gridFirst: 0,
-      averagePosition: 0,
-      averageGridPosition: 0,
-      pointsPerRace: 0,
-      poleToWinRatio: 0,
-      dnfs: 0,
-      racesFinished: 0
-    },
-    driverTwo: {
-      points: 0,
-      wins: 0,
-      poles: 0,
-      podiums: 0,
-      fastestLaps: 0,
-      championships: 0,
-      gridFirst: 0,
-      averagePosition: 0,
-      averageGridPosition: 0,
-      pointsPerRace: 0,
-      poleToWinRatio: 0,
-      dnfs: 0,
-      racesFinished: 0
+    // Filter out undefined results
+    const validSeasons = seasonsResults.filter(
+      (season): season is LegendarySeasonStats => season !== undefined
+    )
+
+    if (validSeasons.length === 0) {
+      console.log('No valid seasons found for rivalry')
+      return undefined
     }
-  }
 
-  let totalRaces = 0
-  seasonsResults.forEach(season => {
-    if (!season) return
-    totalRaces += season.driverOneTotalRaces
+    // Initialize overall stats
+    const stats: LegendaryOverallStats = {
+      driverOne: {
+        points: 0,
+        wins: 0,
+        poles: 0,
+        podiums: 0,
+        fastestLaps: 0,
+        championships: 0,
+        pointsPerRace: 0,
+        poleToWinRatio: 0,
+        dnfs: 0,
+        racesFinished: 0
+      },
+      driverTwo: {
+        points: 0,
+        wins: 0,
+        poles: 0,
+        podiums: 0,
+        fastestLaps: 0,
+        championships: 0,
+        pointsPerRace: 0,
+        poleToWinRatio: 0,
+        dnfs: 0,
+        racesFinished: 0
+      },
+      totalRaces: 0
+    }
 
-    stats.driverOne.points += Number(season.driverOnePoints)
-    stats.driverOne.wins += Number(season.driverOneWins)
-    stats.driverOne.poles += season.driverOnePoles
-    stats.driverOne.gridFirst += season.driverOnePoles
-    stats.driverOne.podiums += season.driverOnePodiums
-    stats.driverOne.fastestLaps += season.driverOneFastestLaps
-    stats.driverOne.dnfs += season.driverOneBetterFinishes
-    if (Number(season.driverOnePosition) === 1) stats.driverOne.championships++
+    // Aggregate stats from each season
+    validSeasons.forEach(season => {
+      // Driver One stats
+      stats.driverOne.points += season.driverOne.points
+      stats.driverOne.wins += season.driverOne.wins
+      stats.driverOne.poles += season.driverOne.poles
+      stats.driverOne.podiums += season.driverOne.podiums
+      stats.driverOne.fastestLaps += season.driverOne.fastestLaps
+      stats.driverOne.dnfs += season.driverOne.dnfs
+      if (season.driverOne.position === 1) stats.driverOne.championships++
 
-    stats.driverTwo.points += Number(season.driverTwoPoints)
-    stats.driverTwo.wins += Number(season.driverTwoWins)
-    stats.driverTwo.poles += season.driverTwoPoles
-    stats.driverTwo.gridFirst += season.driverTwoPoles
-    stats.driverTwo.podiums += season.driverTwoPodiums
-    stats.driverTwo.fastestLaps += season.driverTwoFastestLaps
-    stats.driverTwo.dnfs += season.driverTwoBetterFinishes
-    if (Number(season.driverTwoPosition) === 1) stats.driverTwo.championships++
-  })
+      // Driver Two stats
+      stats.driverTwo.points += season.driverTwo.points
+      stats.driverTwo.wins += season.driverTwo.wins
+      stats.driverTwo.poles += season.driverTwo.poles
+      stats.driverTwo.podiums += season.driverTwo.podiums
+      stats.driverTwo.fastestLaps += season.driverTwo.fastestLaps
+      stats.driverTwo.dnfs += season.driverTwo.dnfs
+      if (season.driverTwo.position === 1) stats.driverTwo.championships++
 
-  // Calculate averages and ratios
-  if (totalRaces > 0) {
-    stats.driverOne.racesFinished = totalRaces - stats.driverOne.dnfs
+      // Update total races
+      stats.totalRaces += season.driverOne.races
+    })
+
+    // Calculate derived stats
+    stats.driverOne.racesFinished = stats.totalRaces - stats.driverOne.dnfs
+    stats.driverTwo.racesFinished = stats.totalRaces - stats.driverTwo.dnfs
+
     stats.driverOne.pointsPerRace = Number(
-      (stats.driverOne.points / totalRaces).toFixed(1)
+      (stats.driverOne.points / stats.totalRaces).toFixed(1)
     )
-    stats.driverOne.averagePosition = 0 // Would need race-by-race data
-    stats.driverOne.averageGridPosition = 0 // Would need race-by-race data
+    stats.driverTwo.pointsPerRace = Number(
+      (stats.driverTwo.points / stats.totalRaces).toFixed(1)
+    )
+
     stats.driverOne.poleToWinRatio =
       stats.driverOne.poles > 0
         ? Number(
             ((stats.driverOne.wins / stats.driverOne.poles) * 100).toFixed(1)
           )
         : 0
-
-    stats.driverTwo.racesFinished = totalRaces - stats.driverTwo.dnfs
-    stats.driverTwo.pointsPerRace = Number(
-      (stats.driverTwo.points / totalRaces).toFixed(1)
-    )
-    stats.driverTwo.averagePosition = 0 // Would need race-by-race data
-    stats.driverTwo.averageGridPosition = 0 // Would need race-by-race data
     stats.driverTwo.poleToWinRatio =
       stats.driverTwo.poles > 0
         ? Number(
             ((stats.driverTwo.wins / stats.driverTwo.poles) * 100).toFixed(1)
           )
         : 0
-  }
 
-  return stats
-}
-
-// Fetch team race result
-export const getTeamRaceResult = async ({
-  season,
-  round,
-  team
-}: {
-  season: string
-  round: string
-  team: string
-}) => {
-  const data = await fetchErgastData<ErgastResponse>(
-    `/${season}/${round}/constructors/${team}/results.json`
-  )
-  if (!data?.MRData?.RaceTable?.Races?.[0]) return undefined
-
-  const race = data.MRData.RaceTable.Races[0]
-  return {
-    raceName: race.raceName,
-    results: race.Results
+    console.log('Overall stats:', stats)
+    return stats
+  } catch (error) {
+    console.error('Error fetching legendary overall stats:', error)
+    return undefined
   }
 }

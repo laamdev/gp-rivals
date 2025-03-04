@@ -14,3 +14,5 @@ export const FINISHED_STATUSES = [
 ]
 
 export const SEASON_LAPS_2024 = 1444
+
+export const MAX_POINTS_2024 = 672
